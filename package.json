@@ -9,5 +9,9 @@
     "type": "git",
     "url": "git://github.com/"
   },
-  "dependencies": {}
+  "dependencies": {
+    "serverless-lambda-prune-plugin": "1.0.3",
+    "serverless-optimizer-plugin": "1.0.0",
+    "serverless-resources-validation-plugin": "0.2.0"
+  }
 }
