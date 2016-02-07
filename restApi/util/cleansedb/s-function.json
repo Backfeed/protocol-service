@@ -1,0 +1,38 @@
+{
+  "custom": {
+    "excludePatterns": [],
+    "envVars": [],
+    "optimize": true
+  },
+  "handler": "util/cleansedb/handler.handler",
+  "name": "cleansedb",
+  "runtime": "nodejs",
+  "timeout": 6,
+  "memorySize": 1024,
+  "eventSourceArn": "",
+  "endpoints": [
+    {
+      "path": "util/cleansedb",
+      "method": "DELETE",
+      "authorizationType": "none",
+      "apiKeyRequired": true,
+      "requestParameters": {},
+      "requestTemplates": {
+        "application/json": ""
+      },
+      "responses": {
+        "400": {
+          "statusCode": "400"
+        },
+        "default": {
+          "statusCode": "200",
+          "responseParameters": {},
+          "responseModels": {},
+          "responseTemplates": {
+            "application/json": ""
+          }
+        }
+      }
+    }
+  ]
+}

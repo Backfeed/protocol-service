@@ -1,0 +1,26 @@
+{
+  "name": "util",
+  "version": "0.0.1",
+  "description": "Dependencies for the REST API",
+  "author": "me me me",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/backfeed"
+  },
+  "keywords": [],
+  "devDependencies": {},
+  "dependencies": {
+    "async": "1.5.1",
+    "aws-sdk": "^2.2.26",
+    "decimal.js": "5.0.3",
+    "immutable": "3.7.6",
+    "mathjs": "2.5.0",
+    "node-uuid": "^1.4.7",
+    "serverless-helpers-js": "~0.0.3",
+    "underscore": "^1.8.3",
+    "winston": "2.1.1",
+    "winston-loggly": "1.2.0"
+  }
+}

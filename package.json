@@ -1,17 +1,34 @@
 {
   "name": "protocol-service",
   "version": "0.0.1",
-  "description": "A Serverless Project and its Serverless Plugin dependencies.",
-  "author": "me",
-  "license": "MIT",
+  "description": "An API service for the Backfeed protocol",
+  "author": "Yaniv Keinan",
+  "license": "GPL",
   "private": false,
+  "scripts": {
+    "test": "mocha test",
+    "localtest": "mocha test",
+    "sanity": "mocha **/basicApi.spec.js",
+    "endBidding": "mocha test/endBidding.spec.js",
+    "protocol": "mocha test/ut.protocol.spec.js -w",
+    "start": "npm run localtest"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/"
+    "url": "git://github.com/backfeed/protocol-service"
   },
   "dependencies": {
     "serverless-lambda-prune-plugin": "1.0.3",
     "serverless-optimizer-plugin": "1.0.0",
     "serverless-resources-validation-plugin": "0.2.0"
+  },
+  "devDependencies": {
+    "chai": "3.4.1",
+    "chakram": "1.2.1",
+    "mocha": "2.3.4",
+    "serverless-helpers-js": "0.0.3",
+    "decimal.js": "5.0.3",
+    "promise": "7.1.1",
+    "underscore": "1.8.3"
   }
 }

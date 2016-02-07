@@ -1,0 +1,38 @@
+{
+  "custom": {
+    "excludePatterns": [],
+    "envVars": [],
+    "optimize": true
+  },
+  "handler": "util/updatecachedrep/handler.handler",
+  "name": "updatecachedrep",
+  "runtime": "nodejs",
+  "timeout": 6,
+  "memorySize": 1024,
+  "eventSourceArn": "",
+  "endpoints": [
+    {
+      "path": "util/updatecachedrep",
+      "method": "PUT",
+      "authorizationType": "none",
+      "apiKeyRequired": true,
+      "requestParameters": {},
+      "requestTemplates": {
+        "application/json": ""
+      },
+      "responses": {
+        "400": {
+          "statusCode": "400"
+        },
+        "default": {
+          "statusCode": "200",
+          "responseParameters": {},
+          "responseModels": {},
+          "responseTemplates": {
+            "application/json": ""
+          }
+        }
+      }
+    }
+  ]
+}

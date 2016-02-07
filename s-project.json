@@ -2,9 +2,9 @@
   "name": "protocol-service",
   "version": "0.0.1",
   "profile": "serverless-v0.3.1",
-  "location": "https://github.com/...",
-  "author": "",
-  "description": "A Slick New Serverless Project",
+  "location": "https://github.com/backfeed/protocol-service",
+  "author": "Yaniv Keinan",
+  "description": "An API service for the Backfeed protocol",
   "custom": {},
   "plugins": [
     "serverless-lambda-prune-plugin",
@@ -13,7 +13,87 @@
   ],
   "cloudFormation": {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "The AWS CloudFormation template for this Serverless application's resources outside of Lambdas and Api Gateway",
+    "Description": "An API service for the Backfeed protocol",
+    "Parameters": {
+      "ProjectName": {
+        "Type": "String",
+        "AllowedValues": [
+          "protocol-service"
+        ],
+        "Default": "protocol-service"
+      },
+      "ProjectDomain": {
+        "Type": "String",
+        "Default": "backfeed.cc"
+      },
+      "Stage": {
+        "Type": "String",
+        "AllowedValues": [
+          "dev"
+        ],
+        "Default": "dev"
+      },
+      "DataModelStage": {
+        "Type": "String",
+        "AllowedValues": [
+          "dev"
+        ],
+        "Default": "dev"
+      },
+      "NotificationEmail": {
+        "Type": "String",
+        "Default": "yaniv@backfeed.cc"
+      },
+      "DynamoRWThroughput": {
+        "Type": "String",
+        "Default": "1"
+      },
+      "LowRWThroughput": {
+        "Type": "String",
+        "Default": "1"
+      },
+      "MediumRWThroughput": {
+        "Type": "String",
+        "Default": "3"
+      },
+      "HighRWThroughput": {
+        "Type": "String",
+        "Default": "5"
+      }
+    },
+    "Metadata": {
+      "AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+          {
+            "Label": {
+              "default": "Project Settings"
+            },
+            "Parameters": [
+              "ProjectName",
+              "ProjectDomain",
+              "Stage",
+              "DataModelStage"
+            ]
+          },
+          {
+            "Label": {
+              "default": "Monitoring"
+            },
+            "Parameters": [
+              "NotificationEmail"
+            ]
+          },
+          {
+            "Label": {
+              "default": "Database Settings (DynamoDB)"
+            },
+            "Parameters": [
+              "DynamoRWThroughput"
+            ]
+          }
+        ]
+      }
+    },
     "Resources": {
       "IamRoleLambda": {
         "Type": "AWS::IAM::Role",
@@ -37,10 +117,40 @@
           "Path": "/"
         }
       },
+      "IamInstanceProfileLambda": {
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+          "Path": "/",
+          "Roles": [
+            {
+              "Ref": "IamRoleLambda"
+            }
+          ]
+        }
+      },
+      "IamGroupLambda": {
+        "Type": "AWS::IAM::Group",
+        "Properties": {
+          "Path": "/"
+        }
+      },
       "IamPolicyLambda": {
         "Type": "AWS::IAM::Policy",
         "Properties": {
-          "PolicyName": "${stage}-${project}-lambda",
+          "PolicyName": {
+            "Fn::Join": [
+              "_-_",
+              [
+                {
+                  "Ref": "Stage"
+                },
+                {
+                  "Ref": "ProjectName"
+                },
+                "lambda"
+              ]
+            ]
+          },
           "PolicyDocument": {
             "Version": "2012-10-17",
             "Statement": [
@@ -51,7 +161,48 @@
                   "logs:CreateLogStream",
                   "logs:PutLogEvents"
                 ],
-                "Resource": "arn:aws:logs:${region}:*:*"
+                "Resource": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:logs",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "*:*"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "*"
+                ],
+                "Resource": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:dynamodb",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "*",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "table/",
+                            {
+                              "Ref": "ProjectName"
+                            },
+                            "-*"
+                          ]
+                        ]
+                      }
+                    ]
+                  ]
+                }
               }
             ]
           },
@@ -59,7 +210,396 @@
             {
               "Ref": "IamRoleLambda"
             }
+          ],
+          "Groups": [
+            {
+              "Ref": "IamGroupLambda"
+            }
           ]
+        }
+      },
+      "UsersDynamoDB": {
+        "Type": "AWS::DynamoDB::Table",
+        "DeletionPolicy": "Retain",
+        "Properties": {
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "id",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "id",
+              "KeyType": "HASH"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": {
+              "Ref": "LowRWThroughput"
+            },
+            "WriteCapacityUnits": {
+              "Ref": "LowRWThroughput"
+            }
+          },
+          "TableName": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "-users-",
+                {
+                  "Ref": "DataModelStage"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "EvaluationsDynamoDB": {
+        "Type": "AWS::DynamoDB::Table",
+        "DeletionPolicy": "Retain",
+        "Properties": {
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "id",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "biddingId",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "contributionId",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "userId",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "value",
+              "AttributeType": "N"
+            },
+            {
+              "AttributeName": "createdAt",
+              "AttributeType": "N"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "id",
+              "KeyType": "HASH"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": {
+              "Ref": "HighRWThroughput"
+            },
+            "WriteCapacityUnits": {
+              "Ref": "HighRWThroughput"
+            }
+          },
+          "TableName": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "-evaluations-",
+                {
+                  "Ref": "DataModelStage"
+                }
+              ]
+            ]
+          },
+          "GlobalSecondaryIndexes": [
+            {
+              "IndexName": "evaluations-biddingId-userId",
+              "KeySchema": [
+                {
+                  "AttributeName": "biddingId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              },
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                },
+                "WriteCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                }
+              }
+            },
+            {
+              "IndexName": "evaluations-biddingId-value",
+              "KeySchema": [
+                {
+                  "AttributeName": "biddingId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "value",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "NonKeyAttributes": [
+                  "userId",
+                  "contributionId"
+                ],
+                "ProjectionType": "INCLUDE"
+              },
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                },
+                "WriteCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                }
+              }
+            },
+            {
+              "IndexName": "evaluations-userId-createdAt",
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "createdAt",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              },
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                },
+                "WriteCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                }
+              }
+            },
+            {
+              "IndexName": "evaluations-contributionId-createdAt",
+              "KeySchema": [
+                {
+                  "AttributeName": "contributionId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "createdAt",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              },
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                },
+                "WriteCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ContributionsDynamoDB": {
+        "Type": "AWS::DynamoDB::Table",
+        "DeletionPolicy": "Retain",
+        "Properties": {
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "id",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "biddingId",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "userId",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "createdAt",
+              "AttributeType": "N"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "id",
+              "KeyType": "HASH"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": {
+              "Ref": "MediumRWThroughput"
+            },
+            "WriteCapacityUnits": {
+              "Ref": "MediumRWThroughput"
+            }
+          },
+          "TableName": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "-contributions-",
+                {
+                  "Ref": "DataModelStage"
+                }
+              ]
+            ]
+          },
+          "GlobalSecondaryIndexes": [
+            {
+              "IndexName": "contributions-biddingId-createdAt",
+              "KeySchema": [
+                {
+                  "AttributeName": "biddingId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "createdAt",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              },
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                },
+                "WriteCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                }
+              }
+            },
+            {
+              "IndexName": "contributions-userId-createdAt",
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "createdAt",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              },
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                },
+                "WriteCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "BiddingsDynamoDB": {
+        "Type": "AWS::DynamoDB::Table",
+        "DeletionPolicy": "Retain",
+        "Properties": {
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "id",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "id",
+              "KeyType": "HASH"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": {
+              "Ref": "LowRWThroughput"
+            },
+            "WriteCapacityUnits": {
+              "Ref": "LowRWThroughput"
+            }
+          },
+          "TableName": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "-biddings-",
+                {
+                  "Ref": "DataModelStage"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "CachingDynamoDB": {
+        "Type": "AWS::DynamoDB::Table",
+        "DeletionPolicy": "Retain",
+        "Properties": {
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "type",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "type",
+              "KeyType": "HASH"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": {
+              "Ref": "LowRWThroughput"
+            },
+            "WriteCapacityUnits": {
+              "Ref": "LowRWThroughput"
+            }
+          },
+          "TableName": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "-caching-",
+                {
+                  "Ref": "DataModelStage"
+                }
+              ]
+            ]
+          }
         }
       }
     },
