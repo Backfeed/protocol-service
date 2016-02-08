@@ -7,11 +7,11 @@ var math   = require('decimal.js');
 
 var util = {
   tables: getTables(),
-  uuid: uuid.v4,
+  uuid  : uuid.v4,
   sumRep: sumRep,
-  math: math,
-  pp: parseProtocol,
-  log: logger.winston
+  math  : math,
+  pp    : parseProtocol,
+  log   : logger.log
 };
 
 module.exports = util;

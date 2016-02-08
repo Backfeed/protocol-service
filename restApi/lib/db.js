@@ -7,90 +7,90 @@ var dynamoDoc = getDynamoDoc();
 var notFoundMsg = '404:Resource not found.';
 
 var db = {
-  put: put,
-  get: get,
-  query: query,
-  scan: scan,
-  update: update,
-  del: del,
-  batchGet: batchGet,
-  batchWrite: batchWrite,
-  tables: getTables()
+  put         : put,
+  get         : get,
+  query       : query,
+  scan        : scan,
+  update      : update,
+  del         : del,
+  batchGet    : batchGet,
+  batchWrite  : batchWrite,
+  tables      : getTables()
 };
 
 module.exports = db;
 
 function put(params, cb, respondSuffix) {
-  util.log.profile('db put');
+  //util.log.profile('db put');
   return dynamoDoc.put(params, function(err, data) {
     if (respondSuffix && _.isEmpty(data)) data = respondSuffix;
     util.log.info(err, data);
-    util.log.profile('db put');
+    //util.log.profile('db put');
     return cb(err, data);
   });
 }
 
 function get(params, cb) {
-  util.log.profile('db get');
+  //util.log.profile('db get');
   return dynamoDoc.get(params, function(err, data) {
     util.log.info(err, data);
     if (err) return {}; //err;
     if (_.isEmpty(data)) return cb(notFoundMsg);
-    util.log.profile('db get');
+    //util.log.profile('db get');
     return cb(err, data.Item);
   });
 }
 
 function query(params, cb) {
-  util.log.profile('db query');
+  //util.log.profile('db query');
   return dynamoDoc.query(params, function(err, data) {
     if (_.isEmpty(data)) return cb(notFoundMsg);
-    util.log.profile('db query');
+    //util.log.profile('db query');
     return cb(err, data.Items);
   });
 }
 
 function scan(params, cb) {
-  util.log.profile('db scan');
+  //util.log.profile('db scan');
   return dynamoDoc.scan(params, function(err, data) {
     if (_.isEmpty(data)) return cb(notFoundMsg);
-    util.log.profile('db scan');
+    //util.log.profile('db scan');
     return cb(err, data.Items);
   });
 }
 
 function update(params, cb) {
-  util.log.profile('db update');
+  //util.log.profile('db update');
   return dynamoDoc.update(params, function(err, data) {
     util.log.info(err, data);
     if (_.isEmpty(data)) return cb(notFoundMsg);
-    util.log.profile('db update');
+    //util.log.profile('db update');
     return cb(err, data.Attributes);
   });
 }
 
 function del(params, cb) {
-  util.log.profile('db del');
+  //util.log.profile('db del');
   return dynamoDoc.delete(params, function(err, data) {
     util.log.info(err, data);
     if (_.isEmpty(data)) return cb(notFoundMsg);
-    util.log.profile('db del');
+    //util.log.profile('db del');
     return cb(err, data.Attributes);
   });
 }
 
 function batchGet(params, cb, table) {
-  util.log.profile('db batchGet');
+  //util.log.profile('db batchGet');
   return dynamoDoc.batchGet(params, function(err, data) {
-    util.log.profile('db batchGet');
+    //util.log.profile('db batchGet');
     return cb(err, data.Responses[table]);
   });
 }
 
 function batchWrite(params, cb, responseValue) {
-  util.log.profile('db batchWrite');
+  //util.log.profile('db batchWrite');
   return dynamoDoc.batchWrite(params, function(err, data) {
-    util.log.profile('db batchWrite');
+    //util.log.profile('db batchWrite');
     return cb(err, responseValue);
   });
 }
