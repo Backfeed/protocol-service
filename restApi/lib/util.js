@@ -27,6 +27,7 @@ function updateCachedRep(event, cb) {
 }
 
 function addToCachedRep(reputation, cb) {
+  util.log.info('addToCachedRep pp', util.pp(reputation));
   var params = {
     TableName: util.tables.caching,
     Key: { type: "totalRepInSystem" },

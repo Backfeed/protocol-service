@@ -56,7 +56,7 @@ function createEvaluation(event, cb) {
     );
 
   }, function(err) {
-    util.log.debug('iterate done');
+    util.log.info('iterate done');
     params.RequestItems[db.tables.evaluations] = submittedEvaluations;
     db.batchWrite(params, cb, responseArr);
   });

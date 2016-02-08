@@ -12,7 +12,7 @@ var protocol          = require('./protocol');
 // Lambda Handler
 module.exports.execute = function(event, cb) {
 
-  util.log.debug('event', event);
+  util.log.info('event', event);
 
   var iMap = Immutable.Map({
     newRep: 0,
@@ -46,7 +46,7 @@ module.exports.execute = function(event, cb) {
 
     function(results, waterfallCB) {
       iMap = iMap.set('cachedRep', results.cachedRep.theValue);
-      util.log.debug('cachedRep', iMap.get('cachedRep'));
+      util.log.info('cachedRep', iMap.get('cachedRep'));
       evaluations = results.evaluations;
 
       var currentUserFormerEvaluation = _.findWhere(evaluations, { userId: event.userId });
@@ -59,7 +59,7 @@ module.exports.execute = function(event, cb) {
 
         newEvalId = currentUserFormerEvaluation.id;
 
-        util.log.debug('current user already evaluated this contribution, removing his vote');
+        util.log.info('current user already evaluated this contribution, removing his vote');
         evaluations = _.reject(evaluations, function(e) {
           return e.userId === event.userId;
         });
@@ -69,7 +69,7 @@ module.exports.execute = function(event, cb) {
       }
 
       evaluations.push(event);
-      util.log.debug('evaluations', evaluations);
+      util.log.info('evaluations', evaluations);
       getEvaluators(evaluations, waterfallCB);
 
     },
@@ -78,7 +78,7 @@ module.exports.execute = function(event, cb) {
       evaluators = result;
 
       evaluators = protocol.evaluate(event.userId, event.value, evaluators, evaluations, iMap.get('cachedRep'));
-
+      util.log.info('evaluators', evaluators);
       updateEvaluatorsRepToDb(evaluators, waterfallCB);
     }
 
