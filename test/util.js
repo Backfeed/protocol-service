@@ -46,7 +46,7 @@ var Promise = require('promise');
 
 
 // var URL = 'http://localhost:1465';
-var URL = 'https://api.backfeed.cc/slant';
+var URL = 'https://api.backfeed.cc/beta';
 
 var params =  {
   headers: { 'x-api-key': process.env.X_API_KEY }

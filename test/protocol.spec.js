@@ -37,11 +37,11 @@ describe.only("Test protocol according to excel", function() {
       });
   });
 
-  after('reset db', function() {
-    return util.cleanseDB().then(function(res) {
-      return chakram.wait();
-    });
-  });
+  //after('reset db', function() {
+  //  return util.cleanseDB().then(function(res) {
+  //    return chakram.wait();
+  //  });
+  //});
 
   it("should cost tokens for submitting a contribution", function () {
     arr = [

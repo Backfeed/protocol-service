@@ -8,7 +8,7 @@
   "scripts": {
     "test": "mocha test",
     "localtest": "mocha test",
-    "sanity": "mocha **/basicApi.spec.js",
+    "sanity": "mocha test/basicApi.spec.js",
     "endBidding": "mocha test/endBidding.spec.js",
     "protocol": "mocha test/ut.protocol.spec.js -w",
     "start": "npm run localtest"

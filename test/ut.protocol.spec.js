@@ -13,12 +13,12 @@ var ROUND_TO = 6;
 var TOKEN_REWARD_FACTOR = 15;
 var REP_REWARD_FACTOR = 5;
 
-describe("Test protocol according to excel", function() {
+describe("Unit Test Protocol", function() {
 
   var evaluators = [];
   var evaluations = [];
 
-  before('reset', function() {
+  beforeEach('reset', function() {
     evaluators = [
       {
         'id': 'current',
@@ -31,20 +31,21 @@ describe("Test protocol according to excel", function() {
         'value': 1
       },
       {
+        'id': 'justaguy',
         'reputation':.3,
         'value': 1
       }
     ];
     evaluations = [
       {
-        'userId': 'whoami',
+        'userId': 'current',
         'value': 1
       }
     ];
   });
 
-  xit("should evaluate", function () {
-    expect(protocol.evaluate('current', 1, evaluators,evaluations,.1)[0].reputation).to.be.equal(4.75);
+  it("should evaluate", function () {
+    expect(protocol.evaluate('current', 1, evaluators,evaluations,.1)[0].reputation).to.be.equal(0.10526315789473684);
   });
 
   it("should calc reward", function () {
@@ -58,13 +59,21 @@ describe("Test protocol according to excel", function() {
     expect(protocol.burnStakeForCurrentUser(5)).to.be.equal(4.75);
   });
 
+  it("should addVoteValueToEvaluators", function () {
+    expect(protocol.addVoteValueToEvaluators(evaluators, evaluations).length).to.be.equal(3);
+  });
+
+  it("should getVoteRep", function () {
+    expect(protocol.getVoteRep(evaluators, 1)).to.be.equal(.6);
+  });
+
   it("should getSameEvaluatorsAddValue", function () {
     expect(protocol.getSameEvaluatorsAddValue(.1,.8,.1,.4)).to.be.closeTo(.001,.000000001);
   });
 
-  xit("should updateSameEvaluatorsRep", function () {
-    expect(protocol.updateSameEvaluatorsRep(evaluators,5,5,5,5,'current')[0].reputation).to.be.equal(4.75);
-    expect(protocol.updateSameEvaluatorsRep(evaluators,5,5,5,5,'whoami')[1].reputation).to.be.equal(4.75);
+  it("should updateSameEvaluatorsRep", function () {
+    expect(protocol.updateSameEvaluatorsRep(evaluators,.1,1,.2,1,'current')[0].reputation).to.be.equal(0.09611803398874989);
+    //expect(protocol.updateSameEvaluatorsRep(evaluators,.1,1,.2,1,'whoami')[1].reputation).to.be.equal();
   });
 
   it("should updateEvaluatorsRep", function () {

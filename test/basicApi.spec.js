@@ -1,20 +1,20 @@
-var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
-var _ = require('underscore');
-var chakram = require('chakram');
-expect = chakram.expect;
+var ServerlessHelpers   = require('serverless-helpers-js').loadEnv();
+var _                   = require('underscore');
+var chakram             = require('chakram');
+var util                = require('./util');
 
-var util = require('../util');
+expect = chakram.expect;
 
 describe("Slant Protocol API", function() {
 
   before("Initialize things for the tests", function () {
   });
 
-  after('reset db', function() {
-    return util.cleanseDB().then(function(res) {
-      return chakram.wait();
-    });
-  });
+  //after('reset db', function() {
+  //  return util.cleanseDB().then(function(res) {
+  //    return chakram.wait();
+  //  });
+  //});
 
   xit("should return 201 on success", function () {
     return expect(util.user.create()).to.have.status(201);
@@ -103,11 +103,11 @@ describe("Slant Protocol API", function() {
     });
 
     it("should create george evaluation for something - Evaluations", function () {
-      return util.evaluation.create({ 
-        'userId': george.id, 
-        'biddingId': abbey.id, 
-        'evaluations': [{ 
-          'contributionId': something.id, 
+      return util.evaluation.create({
+        'userId': george.id,
+        'biddingId': abbey.id,
+        'evaluations': [{
+          'contributionId': something.id,
           'value': 1
         }]
       }).then(function(res) {
@@ -124,14 +124,19 @@ describe("Slant Protocol API", function() {
     });
 
     it("should change george vote for something - Evaluations", function () {
-      return util.evaluation.create({ 
-        'userId': george.id, 
-        'biddingId': abbey.id, 
-        'evaluations': [{ 'contributionId': something.id, 'value': 0 }] 
+      return util.evaluation.create({
+        'userId': george.id,
+        'biddingId': abbey.id,
+        'evaluations': [{
+          'contributionId': something.id,
+          'value': 0
+        }]
       }).then(function(res) {
+        console.log(res);
         expect(res.body[0]).to.be.equal(georgeEvalIdOfsomething);
         return util.evaluation.get(georgeEvalIdOfsomething);
       }).then(function(res) {
+        console.log(res);
         var eval = res.body;
         expect(eval.id).to.be.equal(georgeEvalIdOfsomething);
         expect(eval.value).to.be.equal(0);
@@ -139,7 +144,7 @@ describe("Slant Protocol API", function() {
       });
     });
 
-    it("should clean things up", function () {
+    xit("should clean things up", function () {
       var multipleResponses = [
         util.user.delete(george.id),
         util.bidding.delete(abbey.id),
