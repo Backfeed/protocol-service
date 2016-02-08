@@ -18,11 +18,11 @@ module.exports = util;
 
 function getTables() {
   return {
-    biddings: 'slant-biddings-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    users: 'slant-users-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    caching: 'slant-caching-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    contributions: 'slant-contributions-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    evaluations: 'slant-evaluations-' + process.env.SERVERLESS_DATA_MODEL_STAGE
+    biddings: 'protocol-service-biddings-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
+    users: 'protocol-service-users-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
+    caching: 'protocol-service-caching-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
+    contributions: 'protocol-service-contributions-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
+    evaluations: 'protocol-service-evaluations-' + process.env.SERVERLESS_DATA_MODEL_STAGE
   };
 }
 
