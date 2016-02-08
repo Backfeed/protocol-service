@@ -1,5 +1,9 @@
 {
   "name": "restApi",
   "runtime": "nodejs",
-  "custom": {}
+  "custom": {
+    "optimize": {
+      "exclude": [ "aws-sdk" ]
+    }
+  }
 }
