@@ -10,7 +10,6 @@ var util = {
   uuid  : uuid.v4,
   sumRep: sumRep,
   math  : math,
-  pp    : parseProtocol,
   log   : logger.log
 };
 
@@ -32,6 +31,3 @@ function sumRep(users) {
   }, 0);
 }
 
-function parseProtocol(n) {
-  return math.round(n).toNumber();
-}

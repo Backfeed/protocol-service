@@ -12,6 +12,8 @@ var REP_REWARD_FACTOR = 5;
 module.exports = {
   evaluate: evaluate,
   calcReward: calcReward,
+  addVoteValueToEvaluators: addVoteValueToEvaluators,
+  getVoteRep: getVoteRep,
   burnStakeForCurrentUser: burnStakeForCurrentUser,
   getSameEvaluatorsAddValue: getSameEvaluatorsAddValue,
   updateSameEvaluatorsRep: updateSameEvaluatorsRep,
@@ -42,9 +44,10 @@ function evaluate(uid, value, evaluators, evaluations, cachedRep) {
 
 function addVoteValueToEvaluators(evaluators, evaluations) {
   return _.map(evaluators, function(evaluator) {
-    evaluator.value = _.find(evaluations, function(evaluation) {
+    var evalDude = _.find(evaluations, function(evaluation) {
       return evaluation.userId === evaluator.id;
-    }).value;
+    });
+    evaluator.value = evalDude ? evalDude.value : undefined;
 
     return evaluator;
   });
@@ -54,7 +57,7 @@ function getVoteRep(evaluators, value) {
   var toAdd = 0;
   return _.reduce(evaluators, function(memo, evaluator) {
     toAdd = evaluator.value === value ? evaluator.reputation : 0;
-    return memo + toAdd;
+    return math.add(memo,toAdd).toNumber();
   }, 0);
 }
 
@@ -86,11 +89,13 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
     if ( evaluator.id === currentUserId ) {
       toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
       evaluator.reputation = math.add(burnStakeForCurrentUser(newRep), toAdd).toNumber();
+      //console.log('s e', evaluator);
     }
 
     else if ( evaluator.value === currentEvaluationValue ) {
       toAdd = getSameEvaluatorsAddValue(newRep, factor, evaluator.reputation, voteRep);
       evaluator.reputation = math.add(evaluator.reputation, toAdd).toNumber();
+      //console.log('s v', evaluator);
     }
 
     return evaluator;
@@ -112,7 +117,6 @@ function updateEvaluatorsRep(evaluators, currentUserRep, cachedRep) {
 
 function cleanupEvaluators(evaluators) {
   return _.map(evaluators, function(evaluator) {
-    evaluator.reputation = math.round(evaluator.reputation).toNumber();
     evaluator = _.omit(evaluator, 'value');
     return evaluator;
   });

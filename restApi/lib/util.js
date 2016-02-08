@@ -27,16 +27,17 @@ function updateCachedRep(event, cb) {
 }
 
 function addToCachedRep(reputation, cb) {
-  util.log.info('addToCachedRep pp', util.pp(reputation));
+  util.log.info('addToCachedRep', reputation);
   var params = {
     TableName: util.tables.caching,
     Key: { type: "totalRepInSystem" },
     UpdateExpression: 'set #val = #val + :v',
     ExpressionAttributeNames: { '#val' : 'theValue' },
-    ExpressionAttributeValues: { ':v' : util.pp(reputation) },
+    ExpressionAttributeValues: { ':v' : reputation },
     ReturnValues: 'ALL_NEW'
   };
 
+  //ExpressionAttributeValues: { ':v' : util.math(reputation).abs().toDP(6, 3).toNumber() },
   return db.update(params, cb);
 }
 
