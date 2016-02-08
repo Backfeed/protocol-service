@@ -9,7 +9,7 @@ module.exports = {
 var async = require('async');
 var util  = require('./helper');
 var db    = require('./db');
-var createSingleEvaluation = require('../lib/createSingleEvaluation');
+var createSingleEvaluation = require('./createSingleEvaluation');
 
 function createEvaluation(event, cb) {
 

@@ -16,7 +16,7 @@ var async           = require('async');
 var util            = require('./helper');
 var db              = require('./db');
 var protocol        = require('./protocol');
-var getCachedRep    = require('./util/getcachedrep');
+var getCachedRep    = require('./getCachedRep');
 var contributionLib = require('./contributions');
 
 function createBidding(event, cb) {

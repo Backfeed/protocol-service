@@ -1,5 +1,5 @@
-var util = require('../lib/helper');
-var db = require('../lib/db');
+var util  = require('./helper');
+var db    = require('./db');
 
 module.exports = getCachedRep;
 

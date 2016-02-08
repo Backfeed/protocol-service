@@ -1,13 +1,13 @@
 'use strict';
 
 var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
-var _         = require('underscore');
-var async     = require('async');
-var util      = require('../../util');
-var db        = require('../../util/db');
-var getCachedRep = require('../../util/getcachedrep');
-var Immutable = require('immutable');
-var protocol  = require('../../util/protocol');
+var _                 = require('underscore');
+var async             = require('async');
+var Immutable         = require('immutable');
+var util              = require('./helper');
+var db                = require('./db');
+var getCachedRep      = require('./getCachedRep');
+var protocol          = require('./protocol');
 
 // Lambda Handler
 module.exports.execute = function(event, cb) {
