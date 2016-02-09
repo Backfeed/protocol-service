@@ -1,12 +1,9 @@
 var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
-var _ = require('underscore');
-var chakram = require('chakram');
+var _                 = require('underscore');
+var chakram           = require('chakram');
+var util              = require('./util.js');
+
 expect = chakram.expect;
-
-//var expect = require('chai').expect;
-//var assert = require('chai').assert;
-
-var util = require('./util.js');
 
 describe.only("Test protocol according to excel", function() {
   var biddingId;
@@ -37,11 +34,11 @@ describe.only("Test protocol according to excel", function() {
       });
   });
 
-  //after('reset db', function() {
-  //  return util.cleanseDB().then(function(res) {
-  //    return chakram.wait();
-  //  });
-  //});
+  after('reset db', function() {
+    return util.cleanseDB().then(function(res) {
+      return chakram.wait();
+    });
+  });
 
   it("should cost tokens for submitting a contribution", function () {
     arr = [
