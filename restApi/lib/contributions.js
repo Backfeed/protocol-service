@@ -1,11 +1,11 @@
 'use strict';
 
 module.exports = {
-  createContribution: createContribution,
-  getContribution: getContribution,
-  getContributionEvaluations: getContributionEvaluations,
-  getContributionUsers: getContributionUsers,
-  deleteContribution: deleteContribution
+  createContribution          : createContribution,
+  getContribution             : getContribution,
+  getContributionEvaluations  : getContributionEvaluations,
+  getContributionUsers        : getContributionUsers,
+  deleteContribution          : deleteContribution
 };
 
 var async      = require('async');
@@ -13,6 +13,7 @@ var util       = require('./helper');
 var db         = require('./db');
 var biddingLib = require('./biddings');
 var usersLib   = require('./users');
+var protocol   = require('./protocol');
 
 function createContribution(event, cb) {
 
@@ -28,9 +29,6 @@ function createContribution(event, cb) {
     Item: newContribution
   };
 
-  //TODO contribution fee (param = 1) if not enough token throw error and prevent creation
-  var contributionFee = 1;
-
   async.waterfall([
     function(waterfallCB) {
       biddingLib.getBidding({ id: event.biddingId }, waterfallCB);
@@ -40,8 +38,8 @@ function createContribution(event, cb) {
       usersLib.getUser({ id: event.userId }, waterfallCB);
     },
     function(user, waterfallCB) {
-      if (user.tokens < contributionFee) return cb(new Error('400. bad request. not enough tokens for the contribution fee'));
-      user.tokens -= contributionFee;
+      if (protocol.notEnoughTokens(user)) return cb(new Error('400. bad request. not enough tokens for the contribution fee'));
+      user = protocol.payContributionFee(user);
       usersLib.updateUser(user, waterfallCB);
     },
     function() {

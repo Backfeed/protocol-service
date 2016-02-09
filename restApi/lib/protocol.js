@@ -5,19 +5,21 @@ var math      = require('decimal.js');
 var STAKE = 0.05;
 var ALPHA = 0.5;
 var BETA = 1;
-var ROUND_TO = 6;
 var TOKEN_REWARD_FACTOR = 15;
 var REP_REWARD_FACTOR = 5;
+var CONTRIBUTION_FEE=1;
 
 module.exports = {
-  evaluate: evaluate,
-  calcReward: calcReward,
-  addVoteValueToEvaluators: addVoteValueToEvaluators,
-  getVoteRep: getVoteRep,
-  burnStakeForCurrentUser: burnStakeForCurrentUser,
-  getSameEvaluatorsAddValue: getSameEvaluatorsAddValue,
-  updateSameEvaluatorsRep: updateSameEvaluatorsRep,
-  updateEvaluatorsRep: updateEvaluatorsRep
+  evaluate                  : evaluate,
+  calcReward                : calcReward,
+  notEnoughTokens           : notEnoughTokens,
+  payContributionFee        : payContributionFee,
+  addVoteValueToEvaluators  : addVoteValueToEvaluators,
+  getVoteRep                : getVoteRep,
+  burnStakeForCurrentUser   : burnStakeForCurrentUser,
+  getSameEvaluatorsAddValue : getSameEvaluatorsAddValue,
+  updateSameEvaluatorsRep   : updateSameEvaluatorsRep,
+  updateEvaluatorsRep       : updateEvaluatorsRep
 };
 
 function evaluate(uid, value, evaluators, evaluations, cachedRep) {
@@ -127,4 +129,13 @@ function calcReward(winningContributionScore, cachedRep) {
     reputation: REP_REWARD_FACTOR * winningContributionScore / cachedRep,
     tokens: TOKEN_REWARD_FACTOR * winningContributionScore / cachedRep
   }
+}
+
+function notEnoughTokens(user) {
+  return user.tokens < CONTRIBUTION_FEE;
+}
+
+function payContributionFee(user) {
+  user.tokens -= CONTRIBUTION_FEE;
+  return user;
 }

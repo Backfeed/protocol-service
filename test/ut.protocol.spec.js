@@ -1,17 +1,8 @@
 var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
-var _ = require('underscore');
-var expect = require('chai').expect;
-var assert = require('chai').assert;
-
-var protocol = require('../restApi/lib/protocol.js');
-var util = require('./util');
-
-var STAKE = 0.05;
-var ALPHA = 0.5;
-var BETA = 1;
-var ROUND_TO = 6;
-var TOKEN_REWARD_FACTOR = 15;
-var REP_REWARD_FACTOR = 5;
+var _                 = require('underscore');
+var expect            = require('chai').expect;
+var util              = require('./util');
+var protocol          = require('../restApi/lib/protocol.js');
 
 describe("Unit Test Protocol", function() {
 
@@ -46,6 +37,16 @@ describe("Unit Test Protocol", function() {
 
   it("should evaluate", function () {
     expect(protocol.evaluate('current', 1, evaluators,evaluations,.1)[0].reputation).to.be.equal(0.10526315789473684);
+  });
+
+  it("should notEnoughTokens", function () {
+    expect(protocol.notEnoughTokens({ tokens: 2 })).to.be.equal(false);
+    expect(protocol.notEnoughTokens({ tokens: 1 })).to.be.equal(false);
+    expect(protocol.notEnoughTokens({ tokens: 0 })).to.be.equal(true);
+  });
+
+  it("should payContributionFee", function () {
+    expect(protocol.payContributionFee({ tokens: 2 }).tokens).to.be.equal(1);
   });
 
   it("should calc reward", function () {
