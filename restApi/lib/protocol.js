@@ -136,6 +136,6 @@ function notEnoughTokens(user) {
 }
 
 function payContributionFee(user) {
-  user.tokens -= CONTRIBUTION_FEE;
+  user.tokens = math.sub(user.tokens, CONTRIBUTION_FEE).toNumber();
   return user;
 }
