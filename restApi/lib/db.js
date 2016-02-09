@@ -14,8 +14,7 @@ var db = {
   update      : update,
   del         : del,
   batchGet    : batchGet,
-  batchWrite  : batchWrite,
-  tables      : getTables()
+  batchWrite  : batchWrite
 };
 
 module.exports = db;
@@ -109,14 +108,4 @@ function getDynamoDoc() {
     region:       process.env.AWS_REGION
   };
   return new AWS.DynamoDB.DocumentClient(dynamoConfig);
-}
-
-function getTables() {
-  return {
-    biddings: 'protocol-service-biddings-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    users: 'protocol-service-users-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    caching: 'protocol-service-caching-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    contributions: 'protocol-service-contributions-' + process.env.SERVERLESS_DATA_MODEL_STAGE,
-    evaluations: 'protocol-service-evaluations-' + process.env.SERVERLESS_DATA_MODEL_STAGE
-  };
 }

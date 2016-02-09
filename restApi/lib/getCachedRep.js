@@ -1,12 +1,12 @@
-var util  = require('./helper');
-var db    = require('./db');
+var db      = require('./db');
+var config  = require('./config');
 
 module.exports = getCachedRep;
 
 function getCachedRep(cb) {
 
   var params = {
-    TableName : util.tables.caching,
+    TableName : config.tables.caching,
     Key: { type: "totalRepInSystem" }
   };
 

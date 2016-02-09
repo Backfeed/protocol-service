@@ -6,6 +6,7 @@ var async             = require('async');
 var Immutable         = require('immutable');
 var util              = require('./helper');
 var db                = require('./db');
+var config            = require('./config');
 var getCachedRep      = require('./getCachedRep');
 var protocol          = require('./protocol');
 
@@ -92,7 +93,7 @@ module.exports.execute = function(event, cb) {
 
 function updateEvaluatorsRepToDb(evaluators, cb) {
   var params = {
-    TableName: db.tables.users,
+    TableName: config.tables.users,
     RequestItems: {},
     ReturnConsumedCapacity: 'NONE',
     ReturnItemCollectionMetrics: 'NONE'
@@ -105,14 +106,14 @@ function updateEvaluatorsRepToDb(evaluators, cb) {
     submittedEvaluators.push(dbEvaluatorsWrapper);
   });
 
-  params.RequestItems[db.tables.users] = submittedEvaluators;
+  params.RequestItems[config.tables.users] = submittedEvaluators;
 
   return db.batchWrite(params, cb);
 }
 
 function getEvaluations(contributionId, cb) {
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     IndexName: 'evaluations-contributionId-createdAt',
     KeyConditionExpression: 'contributionId = :hkey',
     ExpressionAttributeValues: { ':hkey': contributionId }
@@ -135,9 +136,9 @@ function getEvaluators(evaluations, cb) {
     return item.id;
   });
 
-  params.RequestItems[db.tables.users] = {
+  params.RequestItems[config.tables.users] = {
     Keys: Keys
   };
 
-  return db.batchGet(params, cb, db.tables.users);
+  return db.batchGet(params, cb, config.tables.users);
 }

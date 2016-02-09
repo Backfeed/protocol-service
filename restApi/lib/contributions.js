@@ -11,6 +11,7 @@ module.exports = {
 var async      = require('async');
 var util       = require('./helper');
 var db         = require('./db');
+var config     = require('./config');
 var biddingLib = require('./biddings');
 var usersLib   = require('./users');
 var protocol   = require('./protocol');
@@ -25,7 +26,7 @@ function createContribution(event, cb) {
   };
 
   var params = {
-    TableName : db.tables.contributions,
+    TableName : config.tables.contributions,
     Item: newContribution
   };
 
@@ -52,7 +53,7 @@ function createContribution(event, cb) {
 function getContribution(event, cb) {
 
   var params = {
-    TableName : db.tables.contributions,
+    TableName : config.tables.contributions,
     Key: { id: event.id }
   };
 
@@ -62,7 +63,7 @@ function getContribution(event, cb) {
 function getContributionEvaluations(event, cb) {
 
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     IndexName: 'evaluations-contributionId-createdAt',
     KeyConditionExpression: 'contributionId = :hkey',
     ExpressionAttributeValues: { ':hkey': event.id }
@@ -79,7 +80,7 @@ function getContributionUsers(event, cb) {
 function deleteContribution(event, cb) {
 
   var params = {
-    TableName : db.tables.contributions,
+    TableName : config.tables.contributions,
     Key: { id: event.id },
     ReturnValues: 'ALL_OLD'
   };

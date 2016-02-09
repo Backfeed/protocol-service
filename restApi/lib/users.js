@@ -9,8 +9,9 @@ module.exports = {
   getUserContributions: getUserContributions
 };
 
-var util  = require('./helper');
-var db    = require('./db');
+var util    = require('./helper');
+var db      = require('./db');
+var config  = require('./config');
 
 function createUser(event, cb) {
 
@@ -23,7 +24,7 @@ function createUser(event, cb) {
   };
 
   var params = {
-    TableName : db.tables.users,
+    TableName : config.tables.users,
     Item: newUser
   };
 
@@ -33,7 +34,7 @@ function createUser(event, cb) {
 function getUser(event, cb) {
 
   var params = {
-    TableName : db.tables.users,
+    TableName : config.tables.users,
     Key: { id: event.id }
   };
 
@@ -42,7 +43,7 @@ function getUser(event, cb) {
 
 function getUserEvaluations(event, cb) {
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     IndexName: 'evaluations-userId-createdAt',
     KeyConditionExpression: 'userId = :hkey',
     ExpressionAttributeValues: { ':hkey': event.id }
@@ -54,7 +55,7 @@ function getUserEvaluations(event, cb) {
 function getUserContributions(event, cb) {
 
   var params = {
-    TableName : db.tables.contributions,
+    TableName : config.tables.contributions,
     IndexName: 'contributions-by-userId-index',
     KeyConditionExpression: 'userId = :hkey',
     ExpressionAttributeValues: {
@@ -68,7 +69,7 @@ function getUserContributions(event, cb) {
 function deleteUser(event, cb) {
 
   var params = {
-    TableName : db.tables.users,
+    TableName : config.tables.users,
     Key: { id: event.id },
     ReturnValues: 'ALL_OLD'
   };
@@ -78,7 +79,7 @@ function deleteUser(event, cb) {
 
 function updateUser(event, cb) {
   var params = {
-    TableName: db.tables.users,
+    TableName: config.tables.users,
     Key: {
       id: event.id
     },

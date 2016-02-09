@@ -7,15 +7,16 @@ module.exports = {
   updateCachedRep: updateCachedRep
 };
 
-var _     = require('underscore');
-var async = require('async');
-var util  = require('./helper');
-var db    = require('./db');
+var _       = require('underscore');
+var async   = require('async');
+var util    = require('./helper');
+var db      = require('./db');
+var config  = require('./config');
 
 function updateCachedRep(event, cb) {
 
   var params = {
-    TableName: util.tables.caching,
+    TableName: config.tables.caching,
     Key: { type: "totalRepInSystem" },
     UpdateExpression: 'set #val = :v',
     ExpressionAttributeNames: { '#val' : 'theValue' },
@@ -29,7 +30,7 @@ function updateCachedRep(event, cb) {
 function addToCachedRep(reputation, cb) {
   util.log.info('addToCachedRep', reputation);
   var params = {
-    TableName: util.tables.caching,
+    TableName: config.tables.caching,
     Key: { type: "totalRepInSystem" },
     UpdateExpression: 'set #val = #val + :v',
     ExpressionAttributeNames: { '#val' : 'theValue' },
@@ -44,7 +45,7 @@ function addToCachedRep(reputation, cb) {
 function cacheTotalUsersRep(event, cb) {
 
   var params = {
-    TableName: util.tables.users,
+    TableName: config.tables.users,
     ProjectionExpression:"reputation",
     ConsistentRead: true,
     ReturnConsumedCapacity: "TOTAL"
@@ -139,7 +140,7 @@ function cleanseDb(event, cb) {
 
 function getAllItemsFromDb(table, cb) {
   var params = {
-    TableName: util.tables[table],
+    TableName: config.tables[table],
     ConsistentRead: true,
     ReturnConsumedCapacity: "TOTAL"
   };
@@ -151,7 +152,7 @@ function deleteItemsFromDb(xs, table, cb) {
 
   async.each(xs, function(x, asyncCB) {
     var params = {
-      TableName : util.tables[table],
+      TableName : config.tables[table],
       Key: { id: x.id }
     };
 

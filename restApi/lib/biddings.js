@@ -15,6 +15,7 @@ var _               = require('underscore');
 var async           = require('async');
 var util            = require('./helper');
 var db              = require('./db');
+var config          = require('./config');
 var protocol        = require('./protocol');
 var getCachedRep    = require('./getCachedRep');
 var contributionLib = require('./contributions');
@@ -29,7 +30,7 @@ function createBidding(event, cb) {
   };
 
   var params = {
-    TableName : db.tables.biddings,
+    TableName : config.tables.biddings,
     Item: newBidding
   };
 
@@ -39,7 +40,7 @@ function createBidding(event, cb) {
 function getBidding(event, cb) {
 
   var params = {
-    TableName : db.tables.biddings,
+    TableName : config.tables.biddings,
     Key: { id: event.id }
   };
 
@@ -105,7 +106,7 @@ function calcWinningContribution(users, evaluations, cb) {
 
 function getPositiveEvaluations(biddingId, cb) {
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     IndexName: 'evaluations-biddingId-value',
     ExpressionAttributeNames: { '#v': 'value' }, // Need to do this since 'value' is a resevred dynamoDB word
     KeyConditionExpression: 'biddingId = :bkey and #v = :v',
@@ -131,11 +132,11 @@ function getUsersByEvaluations(evaluations, cb) {
     return item.id;
   });
 
-  params.RequestItems[db.tables.users] = {
+  params.RequestItems[config.tables.users] = {
     Keys: Keys
   };
 
-  return db.batchGet(params, cb, db.tables.users);
+  return db.batchGet(params, cb, config.tables.users);
 }
 
 function getBiddingContributions(event, cb) {
@@ -174,7 +175,7 @@ function getBiddingContributions(event, cb) {
 function getContributions(event, cb) {
 
   var params = {
-    TableName : db.tables.contributions,
+    TableName : config.tables.contributions,
     IndexName: 'contributions-biddingId-createdAt',
     KeyConditionExpression: 'biddingId = :hkey',
     ExpressionAttributeValues: { ':hkey': event.id }
@@ -199,7 +200,7 @@ function getBiddingUserEvaluations(event, cb) {
 
 function getUserEvaluations(event, cb) {
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     IndexName: 'evaluations-biddingId-userId',
     KeyConditionExpression: 'biddingId = :hkey and userId = :rkey',
     ExpressionAttributeValues: {
@@ -264,7 +265,7 @@ function endBidding(event, cb) {
 function deleteBidding(event, cb) {
 
   var params = {
-    TableName : db.tables.biddings,
+    TableName : config.tables.biddings,
     Key: { id: event.id },
     ReturnValues: 'ALL_OLD'
   };
@@ -274,7 +275,7 @@ function deleteBidding(event, cb) {
 
 function endBiddingInDb(id, winningContributionId, cb) {
   var params = {
-    TableName: db.tables.biddings,
+    TableName: config.tables.biddings,
     Key: { id: id },
     UpdateExpression: 'set #sta = :s, #win = :w, #end = :e',
     ExpressionAttributeNames: {
@@ -295,7 +296,7 @@ function endBiddingInDb(id, winningContributionId, cb) {
 
 function rewardContributor(contributorId, reputation, tokens, cb) {
   var params = {
-    TableName: db.tables.users,
+    TableName: config.tables.users,
     Key: { id: contributorId },
     UpdateExpression: 'set #tok = #tok + :t, #rep = #rep + :r',
     ExpressionAttributeNames: {'#tok' : 'tokens', '#rep' : 'reputation'},

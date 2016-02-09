@@ -9,12 +9,13 @@ module.exports = {
 var async = require('async');
 var util  = require('./helper');
 var db    = require('./db');
+var config  = require('./config');
 var createSingleEvaluation = require('./createSingleEvaluation');
 
 function createEvaluation(event, cb) {
 
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     RequestItems: {},
     ReturnConsumedCapacity: 'NONE',
     ReturnItemCollectionMetrics: 'NONE'
@@ -57,7 +58,7 @@ function createEvaluation(event, cb) {
 
   }, function(err) {
     util.log.info('iterate done');
-    params.RequestItems[db.tables.evaluations] = submittedEvaluations;
+    params.RequestItems[config.tables.evaluations] = submittedEvaluations;
     db.batchWrite(params, cb, responseArr);
   });
 
@@ -66,7 +67,7 @@ function createEvaluation(event, cb) {
 function getEvaluation(event, cb) {
 
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     Key: { id: event.id }
   };
 
@@ -76,7 +77,7 @@ function getEvaluation(event, cb) {
 function deleteEvaluation(event, cb) {
 
   var params = {
-    TableName : db.tables.evaluations,
+    TableName : config.tables.evaluations,
     Key: { id: event.id },
     ReturnValues: 'ALL_OLD'
   };
