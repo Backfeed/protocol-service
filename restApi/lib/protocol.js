@@ -2,12 +2,13 @@ var Immutable = require('immutable');
 var _         = require('underscore');
 var math      = require('decimal.js');
 
-var STAKE = 0.05;
-var ALPHA = 0.5;
-var BETA = 1;
-var TOKEN_REWARD_FACTOR = 15;
-var REP_REWARD_FACTOR = 5;
-var CONTRIBUTION_FEE=1;
+var STAKE               = parseFloat(process.env.STAKE);
+var ALPHA               = parseFloat(process.env.ALPHA);
+var BETA                = parseFloat(process.env.BETA);
+var TOKEN_REWARD_FACTOR = parseFloat(process.env.TOKEN_REWARD_FACTOR);
+var REP_REWARD_FACTOR   = parseFloat(process.env.REP_REWARD_FACTOR);
+var CONTRIBUTION_FEE    = parseFloat(process.env.CONTRIBUTION_FEE);
+var DURATION            = parseFloat(process.env.DURATION);
 
 module.exports = {
   evaluate                  : evaluate,

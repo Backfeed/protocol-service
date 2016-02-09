@@ -24,6 +24,7 @@ function createBidding(event, cb) {
   var newBidding = {
     "id": util.uuid(),
     "status": 'InProgress',
+    "duration": event.duration || parseFloat(process.env.DURATION),
     "createdAt": Date.now()
   };
 
