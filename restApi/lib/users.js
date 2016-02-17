@@ -1,12 +1,14 @@
 'use strict';
 
 module.exports = {
-  createUser: createUser,
-  getUser: getUser,
-  updateUser: updateUser,
-  deleteUser: deleteUser,
-  getUserEvaluations: getUserEvaluations,
-  getUserContributions: getUserContributions
+  createUser            : createUser,
+  getUser               : getUser,
+  updateUser            : updateUser,
+  deleteUser            : deleteUser,
+  getUserEvaluations    : getUserEvaluations,
+  getUserContributions  : getUserContributions,
+  getUsersByEvaluations : getUsersByEvaluations,
+  rewardContributor     : rewardContributor
 };
 
 var util    = require('./helper');
@@ -92,5 +94,40 @@ function updateUser(event, cb) {
     ReturnValues: 'ALL_NEW'
   };
 
+  return db.update(params, cb);
+}
+
+function getUsersByEvaluations(evaluations, cb) {
+  var params = {
+    RequestItems: {}
+  };
+
+  var Keys = _.map(evaluations, function(evaluation) {
+    return { id: evaluation.userId };
+  });
+
+  Keys = _.uniq(Keys, function(item, key, a) {
+    return item.id;
+  });
+
+  params.RequestItems[config.tables.users] = {
+    Keys: Keys
+  };
+
+  return db.batchGet(params, cb, config.tables.users);
+}
+
+function rewardContributor(contributorId, reputation, tokens, cb) {
+  var params = {
+    TableName: config.tables.users,
+    Key: { id: contributorId },
+    UpdateExpression: 'set #tok = #tok + :t, #rep = #rep + :r',
+    ExpressionAttributeNames: {'#tok' : 'tokens', '#rep' : 'reputation'},
+    ExpressionAttributeValues: {
+      ':t' : tokens,
+      ':r' : reputation
+    },
+    ReturnValues: 'ALL_NEW'
+  };
   return db.update(params, cb);
 }

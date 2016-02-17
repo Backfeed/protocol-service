@@ -1,16 +1,17 @@
 'use strict';
 
 module.exports = {
-  createEvaluation: createEvaluation,
-  getEvaluation: getEvaluation,
-  deleteEvaluation: deleteEvaluation
+  createEvaluation  : createEvaluation,
+  getEvaluation     : getEvaluation,
+  deleteEvaluation  : deleteEvaluation,
+  getByValue        : getByValue
 };
 
-var async = require('async');
-var util  = require('./helper');
-var db    = require('./db');
-var config  = require('./config');
-var createSingleEvaluation = require('./createSingleEvaluation');
+var async                   = require('async');
+var util                    = require('./helper');
+var db                      = require('./db');
+var config                  = require('./config');
+var createSingleEvaluation  = require('./createSingleEvaluation');
 
 function createEvaluation(event, cb) {
 
@@ -83,4 +84,19 @@ function deleteEvaluation(event, cb) {
   };
 
   return db.del(params, cb);
+}
+
+function getByValue(biddingId, votedValue, cb) {
+  var params = {
+    TableName : config.tables.evaluations,
+    IndexName: 'evaluations-biddingId-value',
+    ExpressionAttributeNames: { '#v': 'value' }, // Need to do this since 'value' is a reserved dynamoDB word
+    KeyConditionExpression: 'biddingId = :bkey and #v = :v',
+    ExpressionAttributeValues: {
+      ':bkey': biddingId,
+      ':v': votedValue
+    }
+  };
+
+  return db.query(params, cb);
 }

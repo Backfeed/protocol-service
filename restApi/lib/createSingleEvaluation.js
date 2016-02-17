@@ -22,8 +22,6 @@ module.exports.execute = function(event, cb) {
     cachedRep: 0
   });
 
-  var startTime = new Date().getTime();
-
   var evaluations;
   var evaluators;
   var newEvalId;

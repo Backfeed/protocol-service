@@ -4,6 +4,16 @@ var expect            = require('chai').expect;
 var util              = require('./util');
 var protocol          = require('../restApi/lib/protocol.js');
 
+var STAKE               = parseFloat(process.env.STAKE);
+var ALPHA               = parseFloat(process.env.ALPHA);
+//var BETA                = parseFloat(process.env.BETA);
+var GAMMA               = parseFloat(process.env.GAMMA);
+var TOKEN_REWARD_FACTOR = parseFloat(process.env.TOKEN_REWARD_FACTOR);
+var REP_REWARD_FACTOR   = parseFloat(process.env.REP_REWARD_FACTOR);
+var CONTRIBUTION_FEE    = parseFloat(process.env.CONTRIBUTION_FEE);
+var DURATION            = parseFloat(process.env.DURATION);
+var DISTRIBUTION_STAKE  = parseFloat(process.env.DISTRIBUTION_STAKE);
+
 describe("Unit Test Protocol", function() {
 
   var evaluators = [];
@@ -60,6 +70,10 @@ describe("Unit Test Protocol", function() {
     expect(protocol.burnStakeForCurrentUser(5)).to.be.equal(4.75);
   });
 
+  it("should return the stake fee", function () {
+    expect(protocol.stakeFee(1, 5, 100, 8640000, 4320000)).to.be.equal(0.42752203363223046);
+  });
+
   it("should addVoteValueToEvaluators", function () {
     expect(protocol.addVoteValueToEvaluators(evaluators, evaluations).length).to.be.equal(3);
   });
@@ -77,9 +91,9 @@ describe("Unit Test Protocol", function() {
     //expect(protocol.updateSameEvaluatorsRep(evaluators,.1,1,.2,1,'whoami')[1].reputation).to.be.equal();
   });
 
-  it("should updateEvaluatorsRep", function () {
-    expect(protocol.updateEvaluatorsRep(evaluators,.1,1)[0].reputation).to.be.closeTo(.1005025,.0000001);
-    expect(protocol.updateEvaluatorsRep(evaluators,.1,1)[1].reputation).to.be.closeTo(.2020151,.0000001);
-    expect(protocol.updateEvaluatorsRep(evaluators,.1,1)[2].reputation).to.be.closeTo(.3045453,.0000001);
-  });
+  //it("should updateEvaluatorsRep", function () {
+  //  expect(protocol.updateEvaluatorsRep(evaluators,.1,1)[0].reputation).to.be.closeTo(.1005025,.0000001);
+  //  expect(protocol.updateEvaluatorsRep(evaluators,.1,1)[1].reputation).to.be.closeTo(.2020151,.0000001);
+  //  expect(protocol.updateEvaluatorsRep(evaluators,.1,1)[2].reputation).to.be.closeTo(.3045453,.0000001);
+  //});
 });

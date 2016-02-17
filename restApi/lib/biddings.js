@@ -1,14 +1,14 @@
 'use strict';
 
 module.exports = {
-  createBidding: createBidding,
-  getBiddingWithLeadingContribution: getBiddingWithLeadingContribution,
-  getBiddingContributions: getBiddingContributions,
-  getBiddingUserEvaluations: getBiddingUserEvaluations,
-  endBidding: endBidding,
-  getBidding: getBidding,
-  getContributions: getContributions,
-  deleteBidding: deleteBidding
+  createBidding                     : createBidding,
+  getBiddingWithLeadingContribution : getBiddingWithLeadingContribution,
+  getBiddingContributions           : getBiddingContributions,
+  getBiddingUserEvaluations         : getBiddingUserEvaluations,
+  endBidding                        : endBidding,
+  getBidding                        : getBidding,
+  getContributions                  : getContributions,
+  deleteBidding                     : deleteBidding
 };
 
 var _               = require('underscore');
@@ -19,6 +19,8 @@ var config          = require('./config');
 var protocol        = require('./protocol');
 var getCachedRep    = require('./getCachedRep');
 var contributionLib = require('./contributions');
+var evaluationsLib  = require('./evaluations');
+var usersLib        = require('./users');
 
 function createBidding(event, cb) {
 
@@ -72,71 +74,20 @@ function getWinningContribution(biddingId, cb) {
   var evaluations;
   async.waterfall([
     function(waterfallCB) {
-      getPositiveEvaluations(biddingId, waterfallCB);
+      evaluationsLib.getByValue(biddingId, 1, waterfallCB);
     },
-    function(response, waterfallCB) {
-      evaluations = response;
-      getUsersByEvaluations(evaluations, waterfallCB);
+    function(evaluations, waterfallCB) {
+      usersLib.getUsersByEvaluations(evaluations, waterfallCB);
     },
     function(users, waterfallCB) {
-      calcWinningContribution(users, evaluations, waterfallCB);
+      var winningContribution = protocol.calcWinningContribution(users, evaluations);
+      cb(null, winningContribution);
     }
   ],
     function(err, result) {
       cb(err, result);
     }
   );
-}
-
-function calcWinningContribution(users, evaluations, cb) {
-  var scores = {};
-  _.each(evaluations, function(evaluation) {
-    if (!scores[evaluation.contributionId])
-      scores[evaluation.contributionId] = 0;
-
-    scores[evaluation.contributionId] += _.findWhere(users, { id: evaluation.userId }).reputation;
-  });
-  var winningContribution = _.max(_.pairs(scores), _.last);
-  winningContribution = {
-    id: winningContribution[0],
-    score: winningContribution[1]
-  };
-  cb(null, winningContribution);
-}
-
-function getPositiveEvaluations(biddingId, cb) {
-  var params = {
-    TableName : config.tables.evaluations,
-    IndexName: 'evaluations-biddingId-value',
-    ExpressionAttributeNames: { '#v': 'value' }, // Need to do this since 'value' is a resevred dynamoDB word
-    KeyConditionExpression: 'biddingId = :bkey and #v = :v',
-    ExpressionAttributeValues: {
-      ':bkey': biddingId,
-      ':v': 1
-    }
-  };
-
-  return db.query(params, cb);
-}
-
-function getUsersByEvaluations(evaluations, cb) {
-  var params = {
-    RequestItems: {}
-  };
-
-  var Keys = _.map(evaluations, function(evaluation) {
-    return { id: evaluation.userId };
-  });
-
-  Keys = _.uniq(Keys, function(item, key, a) {
-    return item.id;
-  });
-
-  params.RequestItems[config.tables.users] = {
-    Keys: Keys
-  };
-
-  return db.batchGet(params, cb, config.tables.users);
 }
 
 function getBiddingContributions(event, cb) {
@@ -234,8 +185,8 @@ function endBidding(event, cb) {
       }, function(err, results) {
         if(results.bidding.status === 'Completed') return cb('400: bad request. bidding is completed!');
         cachedRep = results.cachedRep.theValue;
-        winningContributionId = results.winningContribution.id
-        winningContributionScore = results.winningContribution.score
+        winningContributionId = results.winningContribution.id;
+        winningContributionScore = results.winningContribution.score;
         waterfallCB(err, null);
       });
     },
@@ -251,11 +202,11 @@ function endBidding(event, cb) {
         },
         rewardContributor: function(parallelCB) {
           var prize = protocol.calcReward(winningContributionScore, cachedRep);
-          rewardContributor(winningContribution.userId, prize.reputation, prize.tokens, parallelCB);
+          usersLib.rewardContributor(winningContribution.userId, prize.reputation, prize.tokens, parallelCB);
         }
       }, function(err, results) {
         var bidding = results.endBiddingInDb;
-        bidding.winningContributorId = winningContribution.userId
+        bidding.winningContributorId = winningContribution.userId;
         return cb(err, bidding);
       });
     }
@@ -291,20 +242,5 @@ function endBiddingInDb(id, winningContributionId, cb) {
     ReturnValues: 'ALL_NEW'
   };
 
-  return db.update(params, cb);
-}
-
-function rewardContributor(contributorId, reputation, tokens, cb) {
-  var params = {
-    TableName: config.tables.users,
-    Key: { id: contributorId },
-    UpdateExpression: 'set #tok = #tok + :t, #rep = #rep + :r',
-    ExpressionAttributeNames: {'#tok' : 'tokens', '#rep' : 'reputation'},
-    ExpressionAttributeValues: {
-      ':t' : tokens,
-      ':r' : reputation
-    },
-    ReturnValues: 'ALL_NEW'
-  };
   return db.update(params, cb);
 }

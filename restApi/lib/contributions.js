@@ -8,13 +8,15 @@ module.exports = {
   deleteContribution          : deleteContribution
 };
 
-var async      = require('async');
-var util       = require('./helper');
-var db         = require('./db');
-var config     = require('./config');
-var biddingLib = require('./biddings');
-var usersLib   = require('./users');
-var protocol   = require('./protocol');
+var async           = require('async');
+var util            = require('./helper');
+var db              = require('./db');
+var config          = require('./config');
+var biddingLib      = require('./biddings');
+var usersLib        = require('./users');
+var protocol        = require('./protocol');
+var evaluationsLib  = require('./evaluations');
+var getCachedRep    = require('./getCachedRep');
 
 function createContribution(event, cb) {
 
@@ -46,7 +48,11 @@ function createContribution(event, cb) {
     function() {
       return db.put(params, cb, newContribution);
     }
-  ]);
+  ], function (err) {
+    if (err) {
+      return cb(err);
+    }
+  });
 
 }
 
@@ -58,6 +64,64 @@ function getContribution(event, cb) {
   };
 
   return db.get(params, cb);
+}
+
+function getContributionScore(event, cb) {
+
+  async.waterfall([
+      // get all evaluations from db
+      function(waterfallCB) {
+        getContributionEvaluations(event, waterfallCB);
+      },
+      function(evaluations, waterfallCB) {
+        async.parallel({
+            cachedRep: function(parallelCB) {
+              getCachedRep(parallelCB);
+            },
+            evaluationsVoteOne: function(parallelCB) {
+              evaluationsLib.getByValue(biddingId, 1, parallelCB);
+            },
+            evaluationsVoteZero: function(parallelCB) {
+              evaluationsLib.getByValue(biddingId, 0, parallelCB);
+            }
+          },
+          function(err, results) {
+            waterfallCB(err, results);
+          }
+        );
+      },
+
+      function(results, waterfallCB) {
+
+      },
+
+      function(result, waterfallCB) {
+      }
+
+    ],
+    function(err, result) {
+      return cb(err, newEvalId);
+    }
+  );
+  // waterfall
+  // get all evaluations from db
+
+  //    parallel
+  // protocol. get eval by value 0
+  // evaluationsLib.getByValue(biddingId, 0, cb);
+  // get all users from db - voted 0
+  // protocol sumRep
+
+  // protocol. get eval by value 1
+  // evaluationsLib.getByValue(biddingId, 1, cb);
+  // get all users from db - voted 1
+  // protocol sumRep
+
+  // getCached
+
+  //    parallel result
+  // protocol calcScore
+
 }
 
 function getContributionEvaluations(event, cb) {
