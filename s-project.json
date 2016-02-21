@@ -29,16 +29,18 @@
       "Stage": {
         "Type": "String",
         "AllowedValues": [
-          "dev"
+          "dev",
+          "dmag"
         ],
-        "Default": "dev"
+        "Default": "dmag"
       },
       "DataModelStage": {
         "Type": "String",
         "AllowedValues": [
-          "dev"
+          "dev",
+          "dmag"
         ],
-        "Default": "dev"
+        "Default": "dmag"
       },
       "NotificationEmail": {
         "Type": "String",
