@@ -21,6 +21,7 @@ function createUser(event, cb) {
     "id": util.uuid(),
     "tokens": event.tokens || parseFloat(process.env.USER_INITIAL_TOKENS),
     "reputation": event.reputation || parseFloat(process.env.USER_INITIAL_REPUTATION),
+    "referral": event.referral,
     "biddingCount": 0,
     "createdAt": Date.now()
   };
