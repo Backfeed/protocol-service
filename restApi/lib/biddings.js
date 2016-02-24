@@ -167,7 +167,6 @@ function endBidding(event, cb) {
   var cachedRep;
   var winningContributionId;
   var winningContributionScore;
-  var winningContributorId;
 
   async.waterfall([
 

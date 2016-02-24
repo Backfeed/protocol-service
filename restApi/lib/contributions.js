@@ -5,7 +5,8 @@ module.exports = {
   getContribution             : getContribution,
   getContributionEvaluations  : getContributionEvaluations,
   getContributionUsers        : getContributionUsers,
-  deleteContribution          : deleteContribution
+  deleteContribution          : deleteContribution,
+  getContributionScore        : getContributionScore
 };
 
 var async           = require('async');
@@ -43,6 +44,7 @@ function createContribution(event, cb) {
     function(user, waterfallCB) {
       if (protocol.notEnoughTokens(user)) return cb(new Error('400. bad request. not enough tokens for the contribution fee'));
       user = protocol.payContributionFee(user);
+      util.log.info("User after contribution fee", user);
       usersLib.updateUser(user, waterfallCB);
     },
     function() {
@@ -68,6 +70,8 @@ function getContribution(event, cb) {
 
 function getContributionScore(event, cb) {
 
+  var users;
+  var totalRep;
   async.waterfall([
       // get all evaluations from db
       function(waterfallCB) {
@@ -79,28 +83,22 @@ function getContributionScore(event, cb) {
               getCachedRep(parallelCB);
             },
             evaluationsVoteOne: function(parallelCB) {
-              evaluationsLib.getByValue(biddingId, 1, parallelCB);
-            },
-            evaluationsVoteZero: function(parallelCB) {
-              evaluationsLib.getByValue(biddingId, 0, parallelCB);
+              evaluationsLib.getByContributionIdAndValue(event.id, 1, parallelCB);
             }
           },
           function(err, results) {
-            waterfallCB(err, results);
+            totalRep = results.cachedRep.theValue;
+            util.log.info("getContributionScore results : ", results);
+            usersLib.getUsersByEvaluations(results.evaluationsVoteOne, waterfallCB);
+            //waterfallCB(err, results);
           }
         );
-      },
-
-      function(results, waterfallCB) {
-
-      },
-
-      function(result, waterfallCB) {
       }
-
     ],
     function(err, result) {
-      return cb(err, newEvalId);
+      util.log.info("getContributionScore users : ", result);
+      var score = protocol.calcUpScore(result, totalRep);
+      return cb(err, score);
     }
   );
   // waterfall

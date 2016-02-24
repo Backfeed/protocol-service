@@ -11,6 +11,7 @@ module.exports = {
   rewardContributor     : rewardContributor
 };
 
+var _       = require('underscore');
 var util    = require('./helper');
 var db      = require('./db');
 var config  = require('./config');
@@ -115,6 +116,7 @@ function getUsersByEvaluations(evaluations, cb) {
     Keys: Keys
   };
 
+  console.log('Keys : ', Keys);
   return db.batchGet(params, cb, config.tables.users);
 }
 

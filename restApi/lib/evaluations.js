@@ -1,10 +1,11 @@
 'use strict';
 
 module.exports = {
-  createEvaluation  : createEvaluation,
-  getEvaluation     : getEvaluation,
-  deleteEvaluation  : deleteEvaluation,
-  getByValue        : getByValue
+  createEvaluation              : createEvaluation,
+  getEvaluation                 : getEvaluation,
+  deleteEvaluation              : deleteEvaluation,
+  getByValue                    : getByValue,
+  getByContributionIdAndValue   : getByContributionIdAndValue
 };
 
 var async                   = require('async');
@@ -94,6 +95,21 @@ function getByValue(biddingId, votedValue, cb) {
     KeyConditionExpression: 'biddingId = :bkey and #v = :v',
     ExpressionAttributeValues: {
       ':bkey': biddingId,
+      ':v': votedValue
+    }
+  };
+
+  return db.query(params, cb);
+}
+
+function getByContributionIdAndValue(contributionId, votedValue, cb) {
+  var params = {
+    TableName : config.tables.evaluations,
+    IndexName: 'evaluations-contributionId-value',
+    ExpressionAttributeNames: { '#v': 'value' },
+    KeyConditionExpression: 'contributionId = :bkey and #v = :v',
+    ExpressionAttributeValues: {
+      ':bkey': contributionId,
       ':v': votedValue
     }
   };

@@ -1,6 +1,7 @@
 var Immutable = require('immutable');
 var _         = require('underscore');
 var math      = require('decimal.js');
+var util      = require('./helper');
 
 var STAKE               = parseFloat(process.env.STAKE);
 var ALPHA               = parseFloat(process.env.ALPHA);
@@ -11,6 +12,7 @@ var REP_REWARD_FACTOR   = parseFloat(process.env.REP_REWARD_FACTOR);
 var CONTRIBUTION_FEE    = parseFloat(process.env.CONTRIBUTION_FEE);
 var DURATION            = parseFloat(process.env.DURATION);
 var DISTRIBUTION_STAKE  = parseFloat(process.env.DISTRIBUTION_STAKE);
+var REWARD_THRESHOLD    = parseFloat(process.env.REWARD_THRESHOLD);
 
 module.exports = {
   evaluate                  : evaluate,
@@ -26,7 +28,8 @@ module.exports = {
   calcWinningContribution   : calcWinningContribution,
   getEvaluationsByVotedValue: getEvaluationsByVotedValue,
   sumReputation             : sumReputation,
-  calcScore                 : calcScore
+  calcScore                 : calcScore,
+  calcUpScore               : calcUpScore
   //updateEvaluatorsRep       : updateEvaluatorsRep
 };
 
@@ -151,6 +154,7 @@ function cleanupEvaluators(evaluators) {
   });
 }
 
+//TODO: make this the total and not only the addition
 function calcReward(winningContributionScore, cachedRep) {
   return {
     reputation: REP_REWARD_FACTOR * winningContributionScore / cachedRep,
@@ -187,11 +191,17 @@ function getEvaluationsByVotedValue(evaluations, votedValue) {
 }
 
 function sumReputation(users) {
+  util.log.info("sumReputation users : ", users);
   return _.reduce(users, function(memo, user) {
     return math.add(memo ,user.reputation).toNumber();
   }, 0)
 }
 
-function calcScore(repUp, repDown, cachedRep) {
-  return math.sub(math.div(repUp, cachedRep), math.div(repDown, cachedRep)).toNumber();
+function calcScore(repUp, totalRep) {
+  return math.div(repUp, totalRep).toNumber();
+}
+
+function calcUpScore(users, totalRep) {
+  var repUp = sumReputation(users);
+  return calcScore(repUp, totalRep);
 }

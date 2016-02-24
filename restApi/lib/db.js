@@ -85,9 +85,11 @@ function del(params, cb) {
 }
 
 function batchGet(params, cb, table) {
+  util.log.info(params);
   var nStartTime = Date.now();
   return dynamoDoc.batchGet(params, function(err, data) {
     var nEndTime = Date.now();
+    util.log.info(err, data);
     util.log.info('DB batchGet Elapsed time: ' + String(nEndTime - nStartTime) + ' milliseconds');
     return cb(err, data.Responses[table]);
   });

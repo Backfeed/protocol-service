@@ -372,6 +372,34 @@
               }
             },
             {
+              "IndexName": "evaluations-contributionId-value",
+              "KeySchema": [
+                {
+                  "AttributeName": "contributionId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "value",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "NonKeyAttributes": [
+                  "userId",
+                  "contributionId"
+                ],
+                "ProjectionType": "INCLUDE"
+              },
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                },
+                "WriteCapacityUnits": {
+                  "Ref": "LowRWThroughput"
+                }
+              }
+            },
+            {
               "IndexName": "evaluations-userId-createdAt",
               "KeySchema": [
                 {
