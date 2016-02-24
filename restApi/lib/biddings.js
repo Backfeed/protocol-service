@@ -51,13 +51,13 @@ function getBidding(event, cb) {
 
 function getBiddingWithLeadingContribution(event, cb) {
   async.parallel({
-    bidding: function(parallelCB) {
-      getBidding(event, parallelCB);
+      bidding: function(parallelCB) {
+        getBidding(event, parallelCB);
+      },
+      winningContribution: function(parallelCB) {
+        getWinningContribution(event.id, parallelCB);
+      }
     },
-    winningContribution: function(parallelCB) {
-      getWinningContribution(event.id, parallelCB);
-    }
-  },
     function(err, results) {
       var bidding = results.bidding;
       if (_.isEmpty(bidding)) {
@@ -73,19 +73,22 @@ function getBiddingWithLeadingContribution(event, cb) {
 function getWinningContribution(biddingId, cb) {
   var evaluations;
   async.waterfall([
-    function(waterfallCB) {
-      evaluationsLib.getByValue(biddingId, 1, waterfallCB);
-    },
-    function(evaluations, waterfallCB) {
-      usersLib.getUsersByEvaluations(evaluations, waterfallCB);
-    },
-    function(users, waterfallCB) {
-      var winningContribution = protocol.calcWinningContribution(users, evaluations);
-      cb(null, winningContribution);
-    }
-  ],
-    function(err, result) {
-      cb(err, result);
+      function(waterfallCB) {
+        evaluationsLib.getByValue(biddingId, 1, waterfallCB);
+      },
+      function(result, waterfallCB) {
+        util.log.info("evaluations : ", result);
+        evaluations = result;
+        usersLib.getUsersByEvaluations(evaluations, waterfallCB);
+      },
+      function(users) {
+        util.log.info("users : ", users);
+        var winningContribution = protocol.calcWinningContribution(users, evaluations);
+        cb(null, winningContribution);
+      }
+    ],
+    function(err) {
+      cb(err);
     }
   );
 }
@@ -172,25 +175,28 @@ function endBidding(event, cb) {
 
     function(waterfallCB) {
       async.parallel({
-        cachedRep: function(parallelCB) {
-          getCachedRep(parallelCB);
+          cachedRep: function(parallelCB) {
+            getCachedRep(parallelCB);
+          },
+          winningContribution: function(parallelCB) {
+            getWinningContribution(biddingId, parallelCB);
+          },
+          bidding: function(parallelCB) {
+            getBidding({ id: event.id }, parallelCB);
+          }
         },
-        winningContribution: function(parallelCB) {
-          getWinningContribution(biddingId, parallelCB);
-        },
-        bidding: function(parallelCB) {
-          getBidding({ id: event.id }, parallelCB);
-        }
-      }, function(err, results) {
-        if(results.bidding.status === 'Completed') return cb('400: bad request. bidding is completed!');
-        cachedRep = results.cachedRep.theValue;
-        winningContributionId = results.winningContribution.id;
-        winningContributionScore = results.winningContribution.score;
-        waterfallCB(err, null);
-      });
+        function(err, results) {
+          util.log.info("Results : ", results);
+          if(results.bidding.status === 'Completed') return cb('400: bad request. bidding is completed!');
+          cachedRep = results.cachedRep.theValue;
+          winningContributionId = results.winningContribution.id;
+          winningContributionScore = results.winningContribution.score;
+          waterfallCB(err, null);
+        });
     },
 
     function(emptyResult, waterfallCB) {
+      util.log.info("emptyResult : ", emptyResult);
       contributionLib.getContribution({ id: winningContributionId }, waterfallCB);
     },
 
@@ -201,13 +207,19 @@ function endBidding(event, cb) {
         },
         rewardContributor: function(parallelCB) {
           var prize = protocol.calcReward(winningContributionScore, cachedRep);
-          usersLib.rewardContributor(winningContribution.userId, prize.reputation, prize.tokens, parallelCB);
+          if (prize) {
+            usersLib.rewardContributor(winningContribution.userId, prize.reputation, prize.tokens, parallelCB);
+          } else {
+            parallelCB(null, null);
+          }
         }
-      }, function(err, results) {
-        var bidding = results.endBiddingInDb;
-        bidding.winningContributorId = winningContribution.userId;
-        return cb(err, bidding);
-      });
+      },
+        function(err, results) {
+          util.log.info("Results : ", results);
+          var bidding = results.endBiddingInDb;
+          bidding.winningContributorId = winningContribution.userId;
+          return cb(err, bidding);
+        });
     }
   ]);
 }

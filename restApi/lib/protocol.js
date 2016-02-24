@@ -156,6 +156,7 @@ function cleanupEvaluators(evaluators) {
 
 //TODO: make this the total and not only the addition
 function calcReward(winningContributionScore, cachedRep) {
+  if (winningContributionScore < REWARD_THRESHOLD) return false;
   return {
     reputation: REP_REWARD_FACTOR * winningContributionScore / cachedRep,
     tokens: TOKEN_REWARD_FACTOR * winningContributionScore / cachedRep
