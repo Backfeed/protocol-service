@@ -28,41 +28,42 @@ function createEvaluation(event, cb) {
   var dbEvaluationWrapper;
 
   async.each(event.evaluations, function(element, eachCB) {
-    var newEvaluation = {
-      "userId": event.userId,
-      "biddingId": event.biddingId,
-      "contributionId": element.contributionId,
-      "value": element.value,
-      "createdAt": Date.now()
-    };
+      var newEvaluation = {
+        "userId": event.userId,
+        "biddingId": event.biddingId,
+        "contributionId": element.contributionId,
+        "value": element.value,
+        "createdAt": Date.now()
+      };
 
-    async.waterfall([
-      function(waterfallCB) {
-        createSingleEvaluation.execute(newEvaluation, waterfallCB);
-      }
-    ],
-      function(err, newEvalId) {
-        if (err) {
-          responseArr.push(err);
-        } else {
-          newEvaluation.id = newEvalId;
-          dbEvaluationWrapper = {
-            PutRequest: {
-              Item: newEvaluation
-            }
-          };
-          submittedEvaluations.push(dbEvaluationWrapper);
-          responseArr.push(newEvaluation.id);
+      async.waterfall([
+          function(waterfallCB) {
+            createSingleEvaluation.execute(newEvaluation, waterfallCB);
+          }
+        ],
+        function(err, newEvalId) {
+          if (err) {
+            responseArr.push(err);
+          } else {
+            newEvaluation.id = newEvalId;
+            dbEvaluationWrapper = {
+              PutRequest: {
+                Item: newEvaluation
+              }
+            };
+            submittedEvaluations.push(dbEvaluationWrapper);
+            responseArr.push(newEvaluation.id);
+          }
+          eachCB(null);
         }
-        eachCB(null);
-      }
-    );
+      );
 
-  }, function(err) {
-    util.log.info('iterate done');
-    params.RequestItems[config.tables.evaluations] = submittedEvaluations;
-    db.batchWrite(params, cb, responseArr);
-  });
+    },
+    function(err) {
+      util.log.info('iterate done');
+      params.RequestItems[config.tables.evaluations] = submittedEvaluations;
+      db.batchWrite(params, cb, responseArr);
+    });
 
 }
 

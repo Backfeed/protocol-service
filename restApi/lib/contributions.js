@@ -73,8 +73,8 @@ function getContributionScore(event, cb) {
   var users;
   var totalRep;
   async.waterfall([
-      // get all evaluations from db
       function(waterfallCB) {
+        // get all evaluations from db
         getContributionEvaluations(event, waterfallCB);
       },
       function(evaluations, waterfallCB) {
@@ -90,7 +90,6 @@ function getContributionScore(event, cb) {
             totalRep = results.cachedRep.theValue;
             util.log.info("getContributionScore results : ", results);
             usersLib.getUsersByEvaluations(results.evaluationsVoteOne, waterfallCB);
-            //waterfallCB(err, results);
           }
         );
       }
@@ -101,25 +100,6 @@ function getContributionScore(event, cb) {
       return cb(err, score);
     }
   );
-  // waterfall
-  // get all evaluations from db
-
-  //    parallel
-  // protocol. get eval by value 0
-  // evaluationsLib.getByValue(biddingId, 0, cb);
-  // get all users from db - voted 0
-  // protocol sumRep
-
-  // protocol. get eval by value 1
-  // evaluationsLib.getByValue(biddingId, 1, cb);
-  // get all users from db - voted 1
-  // protocol sumRep
-
-  // getCached
-
-  //    parallel result
-  // protocol calcScore
-
 }
 
 function getContributionEvaluations(event, cb) {
