@@ -207,6 +207,7 @@ function endBidding(event, cb) {
         },
         rewardContributor: function(parallelCB) {
           var prize = protocol.calcReward(winningContributionScore, cachedRep);
+          util.log.info("prize : ", prize);
           if (prize) {
             usersLib.rewardContributor(winningContribution.userId, prize.reputation, prize.tokens, parallelCB);
           } else {

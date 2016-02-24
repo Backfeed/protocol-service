@@ -154,12 +154,14 @@ function cleanupEvaluators(evaluators) {
   });
 }
 
-//TODO: make this the total and not only the addition
 function calcReward(winningContributionScore, cachedRep) {
-  if (winningContributionScore < REWARD_THRESHOLD) return false;
+  //TODO: make this the total and not only the addition
+  var score = math.div(winningContributionScore, cachedRep).toNumber();
+  util.log.info("score : ", score, " , RT : ", REWARD_THRESHOLD);
+  if (score < REWARD_THRESHOLD) return false;
   return {
-    reputation: REP_REWARD_FACTOR * winningContributionScore / cachedRep,
-    tokens: TOKEN_REWARD_FACTOR * winningContributionScore / cachedRep
+    reputation: math.mul(REP_REWARD_FACTOR, score).toNumber(),
+    tokens: math.mul(TOKEN_REWARD_FACTOR, score).toNumber()
   }
 }
 
