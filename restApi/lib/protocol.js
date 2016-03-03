@@ -35,25 +35,28 @@ module.exports = {
 
 function evaluate(uid, value, evaluators, evaluations, cachedRep) {
 
-  var iMap = Immutable.Map({
-    newRep: 0,
-    voteRep: 0,
-    totalVoteRep: 0,
-    cachedRep: cachedRep
-  });
+  // In the current slant protocol, only up-votes are counted for
+  if (parseInt(value) !== 0) {
 
-  evaluators = addVoteValueToEvaluators(evaluators, evaluations);
-  iMap = iMap.set('newRep', getCurrentUserFrom(evaluators, uid).reputation);
-  iMap = iMap.set('voteRep', getVoteRep(evaluators, value));
-  iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
+    var iMap = Immutable.Map({
+      newRep: 0,
+      voteRep: 0,
+      totalVoteRep: 0,
+      cachedRep: cachedRep
+    });
+
+    evaluators = addVoteValueToEvaluators(evaluators, evaluations);
+    iMap = iMap.set('newRep', getCurrentUserFrom(evaluators, uid).reputation);
+    iMap = iMap.set('voteRep', getVoteRep(evaluators, value));
+    iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
 
 
-  evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, iMap.get('totalVoteRep'));
+    evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, iMap.get('totalVoteRep'));
 
-  //evaluators = updateEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'));
+    //evaluators = updateEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'));
 
-  evaluators = cleanupEvaluators(evaluators);
-
+    evaluators = cleanupEvaluators(evaluators);
+  }
   return evaluators;
 }
 

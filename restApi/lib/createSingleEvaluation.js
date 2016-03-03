@@ -5,10 +5,10 @@ var _                 = require('underscore');
 var async             = require('async');
 var Immutable         = require('immutable');
 var util              = require('./helper');
-var db                = require('./db');
-var config            = require('./config');
 var getCachedRep      = require('./getCachedRep');
 var protocol          = require('./protocol');
+var usersLib          = require('./users');
+var evaluationsLib    = require('./evaluations');
 
 // Lambda Handler
 module.exports.execute = function(event, cb) {
@@ -34,7 +34,7 @@ module.exports.execute = function(event, cb) {
           getCachedRep(parallelCB);
         },
         evaluations: function(parallelCB) {
-          getEvaluations(event.contributionId, parallelCB);
+          evaluationsLib.getEvaluationsByContribution(event.contributionId, parallelCB);
         }
       },
         function(err, results) {
@@ -69,7 +69,7 @@ module.exports.execute = function(event, cb) {
 
       evaluations.push(event);
       util.log.info('evaluations', evaluations);
-      getEvaluators(evaluations, waterfallCB);
+      usersLib.getEvaluators(evaluations, waterfallCB);
 
     },
 
@@ -78,7 +78,7 @@ module.exports.execute = function(event, cb) {
 
       evaluators = protocol.evaluate(event.userId, event.value, evaluators, evaluations, iMap.get('cachedRep'));
       util.log.info('evaluators', evaluators);
-      updateEvaluatorsRepToDb(evaluators, waterfallCB);
+      usersLib.updateEvaluatorsRepToDb(evaluators, waterfallCB);
     }
 
   ],
@@ -89,54 +89,3 @@ module.exports.execute = function(event, cb) {
 
 };
 
-function updateEvaluatorsRepToDb(evaluators, cb) {
-  var params = {
-    TableName: config.tables.users,
-    RequestItems: {},
-    ReturnConsumedCapacity: 'NONE',
-    ReturnItemCollectionMetrics: 'NONE'
-  };
-  var submittedEvaluators = [];
-  _.each(evaluators, function(evaluator) {
-    var dbEvaluatorsWrapper = {
-      PutRequest: { Item: evaluator }
-    };
-    submittedEvaluators.push(dbEvaluatorsWrapper);
-  });
-
-  params.RequestItems[config.tables.users] = submittedEvaluators;
-
-  return db.batchWrite(params, cb);
-}
-
-function getEvaluations(contributionId, cb) {
-  var params = {
-    TableName : config.tables.evaluations,
-    IndexName: 'evaluations-contributionId-createdAt',
-    KeyConditionExpression: 'contributionId = :hkey',
-    ExpressionAttributeValues: { ':hkey': contributionId }
-  };
-
-  return db.query(params, cb);
-}
-
-function getEvaluators(evaluations, cb) {
-
-  var params = {
-    RequestItems: {}
-  };
-
-  var Keys = _.map(evaluations, function(evaluation) {
-    return { id: evaluation.userId };
-  });
-
-  Keys = _.uniq(Keys, function(item, key, a) {
-    return item.id;
-  });
-
-  params.RequestItems[config.tables.users] = {
-    Keys: Keys
-  };
-
-  return db.batchGet(params, cb, config.tables.users);
-}

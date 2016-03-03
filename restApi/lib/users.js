@@ -1,14 +1,16 @@
 'use strict';
 
 module.exports = {
-  createUser            : createUser,
-  getUser               : getUser,
-  updateUser            : updateUser,
-  deleteUser            : deleteUser,
-  getUserEvaluations    : getUserEvaluations,
-  getUserContributions  : getUserContributions,
-  getUsersByEvaluations : getUsersByEvaluations,
-  rewardContributor     : rewardContributor
+  createUser              : createUser,
+  getUser                 : getUser,
+  updateUser              : updateUser,
+  deleteUser              : deleteUser,
+  getUserEvaluations      : getUserEvaluations,
+  getUserContributions    : getUserContributions,
+  getUsersByEvaluations   : getUsersByEvaluations,
+  rewardContributor       : rewardContributor,
+  getEvaluators           : getEvaluators,
+  updateEvaluatorsRepToDb : updateEvaluatorsRepToDb
 };
 
 var _       = require('underscore');
@@ -133,4 +135,45 @@ function rewardContributor(contributorId, reputation, tokens, cb) {
     ReturnValues: 'ALL_NEW'
   };
   return db.update(params, cb);
+}
+
+function getEvaluators(evaluations, cb) {
+
+  var params = {
+    RequestItems: {}
+  };
+
+  var Keys = _.map(evaluations, function(evaluation) {
+    return { id: evaluation.userId };
+  });
+
+  Keys = _.uniq(Keys, function(item, key, a) {
+    return item.id;
+  });
+
+  params.RequestItems[config.tables.users] = {
+    Keys: Keys
+  };
+
+  return db.batchGet(params, cb, config.tables.users);
+}
+
+function updateEvaluatorsRepToDb(evaluators, cb) {
+  var params = {
+    TableName: config.tables.users,
+    RequestItems: {},
+    ReturnConsumedCapacity: 'NONE',
+    ReturnItemCollectionMetrics: 'NONE'
+  };
+  var submittedEvaluators = [];
+  _.each(evaluators, function(evaluator) {
+    var dbEvaluatorsWrapper = {
+      PutRequest: { Item: evaluator }
+    };
+    submittedEvaluators.push(dbEvaluatorsWrapper);
+  });
+
+  params.RequestItems[config.tables.users] = submittedEvaluators;
+
+  return db.batchWrite(params, cb);
 }

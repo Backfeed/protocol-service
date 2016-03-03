@@ -5,7 +5,8 @@ module.exports = {
   getEvaluation                 : getEvaluation,
   deleteEvaluation              : deleteEvaluation,
   getByValue                    : getByValue,
-  getByContributionIdAndValue   : getByContributionIdAndValue
+  getByContributionIdAndValue   : getByContributionIdAndValue,
+  getEvaluationsByContribution  : getEvaluationsByContribution
 };
 
 var async                   = require('async');
@@ -117,3 +118,16 @@ function getByContributionIdAndValue(contributionId, votedValue, cb) {
 
   return db.query(params, cb);
 }
+
+
+function getEvaluationsByContribution(contributionId, cb) {
+  var params = {
+    TableName : config.tables.evaluations,
+    IndexName: 'evaluations-contributionId-createdAt',
+    KeyConditionExpression: 'contributionId = :hkey',
+    ExpressionAttributeValues: { ':hkey': contributionId }
+  };
+
+  return db.query(params, cb);
+}
+
