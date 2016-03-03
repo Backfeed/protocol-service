@@ -30,17 +30,19 @@
         "Type": "String",
         "AllowedValues": [
           "dev",
-          "dmag"
+          "dmag",
+          "slant"
         ],
-        "Default": "dmag"
+        "Default": "slant"
       },
       "DataModelStage": {
         "Type": "String",
         "AllowedValues": [
           "dev",
-          "dmag"
+          "dmag",
+          "slant"
         ],
-        "Default": "dmag"
+        "Default": "slant"
       },
       "NotificationEmail": {
         "Type": "String",
