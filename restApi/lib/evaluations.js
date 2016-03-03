@@ -14,6 +14,7 @@ var util                    = require('./helper');
 var db                      = require('./db');
 var config                  = require('./config');
 var createSingleEvaluation  = require('./createSingleEvaluation');
+var biddingLib              = require('./biddings');
 
 function createEvaluation(event, cb) {
 
@@ -28,44 +29,50 @@ function createEvaluation(event, cb) {
   var responseArr = [];
   var dbEvaluationWrapper;
 
-  async.each(event.evaluations, function(element, eachCB) {
-      var newEvaluation = {
-        "userId": event.userId,
-        "biddingId": event.biddingId,
-        "contributionId": element.contributionId,
-        "value": element.value,
-        "createdAt": Date.now()
-      };
-
-      async.waterfall([
-          function(waterfallCB) {
-            createSingleEvaluation.execute(newEvaluation, waterfallCB);
-          }
-        ],
-        function(err, newEvalId) {
-          if (err) {
-            responseArr.push(err);
-          } else {
-            newEvaluation.id = newEvalId;
-            dbEvaluationWrapper = {
-              PutRequest: {
-                Item: newEvaluation
-              }
-            };
-            submittedEvaluations.push(dbEvaluationWrapper);
-            responseArr.push(newEvaluation.id);
-          }
-          eachCB(null);
-        }
-      );
-
+  async.waterfall([
+    function(waterfallCB) {
+      biddingLib.getBidding({ id: event.biddingId }, waterfallCB);
     },
-    function(err) {
-      util.log.info('iterate done');
-      params.RequestItems[config.tables.evaluations] = submittedEvaluations;
-      db.batchWrite(params, cb, responseArr);
-    });
+    function(bidding) {
+      async.each(event.evaluations, function (element, eachCB) {
+          var newEvaluation = {
+            "userId": event.userId,
+            "biddingId": event.biddingId,
+            "contributionId": element.contributionId,
+            "value": element.value,
+            "createdAt": Date.now()
+          };
 
+          async.waterfall([
+              function (waterfallCB) {
+                createSingleEvaluation.execute(newEvaluation, bidding.createdAt, waterfallCB);
+              }
+            ],
+            function (err, newEvalId) {
+              if (err) {
+                responseArr.push(err);
+              } else {
+                newEvaluation.id = newEvalId;
+                dbEvaluationWrapper = {
+                  PutRequest: {
+                    Item: newEvaluation
+                  }
+                };
+                submittedEvaluations.push(dbEvaluationWrapper);
+                responseArr.push(newEvaluation.id);
+              }
+              eachCB(null);
+            }
+          );
+
+        },
+        function (err) {
+          util.log.info('iterate done');
+          params.RequestItems[config.tables.evaluations] = submittedEvaluations;
+          db.batchWrite(params, cb, responseArr);
+        });
+    }
+    ]);
 }
 
 function getEvaluation(event, cb) {

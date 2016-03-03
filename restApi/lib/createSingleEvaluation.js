@@ -11,7 +11,7 @@ var usersLib          = require('./users');
 var evaluationsLib    = require('./evaluations');
 
 // Lambda Handler
-module.exports.execute = function(event, cb) {
+module.exports.execute = function(event, bidCreationTime, cb) {
 
   util.log.info('event', event);
 
@@ -76,7 +76,7 @@ module.exports.execute = function(event, cb) {
     function(result, waterfallCB) {
       evaluators = result;
 
-      evaluators = protocol.evaluate(event.userId, event.value, evaluators, evaluations, iMap.get('cachedRep'));
+      evaluators = protocol.evaluate(event.userId, event.value, evaluators, evaluations, iMap.get('cachedRep'), bidCreationTime);
       util.log.info('evaluators', evaluators);
       usersLib.updateEvaluatorsRepToDb(evaluators, waterfallCB);
     }

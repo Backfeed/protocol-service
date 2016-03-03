@@ -33,7 +33,7 @@ module.exports = {
   //updateEvaluatorsRep       : updateEvaluatorsRep
 };
 
-function evaluate(uid, value, evaluators, evaluations, cachedRep) {
+function evaluate(uid, value, evaluators, evaluations, cachedRep, bidCreationTime) {
 
   // In the current slant protocol, only up-votes are counted for
   if (parseInt(value) !== 0) {
@@ -51,7 +51,7 @@ function evaluate(uid, value, evaluators, evaluations, cachedRep) {
     iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
 
 
-    evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, iMap.get('totalVoteRep'));
+    evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, iMap.get('totalVoteRep'), bidCreationTime);
 
     //evaluators = updateEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'));
 
@@ -113,13 +113,14 @@ function getSameEvaluatorsAddValue(newRep, factor, evaluatorRep, voteRep) {
                 .toNumber();
 }
 
-function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, currentEvaluationValue, currentUserId, totalVoteRep) {
+function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, currentEvaluationValue, currentUserId, totalVoteRep, bidCreationTime) {
   var toAdd;
   var factor = math.pow(math.div(voteRep, cachedRep).toNumber(), ALPHA).toNumber();
   return _.map(evaluators, function(evaluator) {
 
     if ( evaluator.id === currentUserId ) {
-      var tSinceStarted = math.sub(Date.now(), DURATION);
+      var tSinceStarted = math.sub(Date.now(), bidCreationTime).toNumber();
+      util.log.info("tSinceStarted : ", tSinceStarted, " , bidCreationTime : ", bidCreationTime);
       var fee = stakeFee(evaluator.reputation, totalVoteRep, cachedRep, DURATION, tSinceStarted);
       // why? once a user pays himself he can profit only by evaluating - risk free
       //toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
