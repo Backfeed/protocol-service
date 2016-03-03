@@ -121,8 +121,10 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
     if ( evaluator.id === currentUserId ) {
       var tSinceStarted = math.sub(Date.now(), DURATION);
       var fee = stakeFee(evaluator.reputation, totalVoteRep, cachedRep, DURATION, tSinceStarted);
-      toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
-      evaluator.reputation = math.add(burnStakeForCurrentUser(newRep, fee), toAdd).toNumber();
+      // why? once a user pays himself he can profit only by evaluating - risk free
+      //toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
+      //evaluator.reputation = math.add(burnStakeForCurrentUser(newRep, fee), toAdd).toNumber();
+      evaluator.reputation = burnStakeForCurrentUser(newRep, fee);
       //console.log('s e', evaluator);
     }
 
