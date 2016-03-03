@@ -21,13 +21,14 @@ var getCachedRep    = require('./getCachedRep');
 var contributionLib = require('./contributions');
 var evaluationsLib  = require('./evaluations');
 var usersLib        = require('./users');
+var DURATION        = parseFloat(process.env.DURATION);
 
 function createBidding(event, cb) {
 
   var newBidding = {
     "id": util.uuid(),
     "status": 'InProgress',
-    "duration": event.duration || parseFloat(process.env.DURATION),
+    "duration": event.duration || DURATION,
     "createdAt": Date.now()
   };
 
