@@ -111,6 +111,7 @@ describe("Slant Protocol API", function() {
           'value': 1
         }]
       }).then(function(res) {
+        console.log(res);
         georgeEvalIdOfsomething = res.body[0];
         expect(georgeEvalIdOfsomething).to.have.length.above(14);
         expect(georgeEvalIdOfsomething).to.be.a('string');
@@ -123,7 +124,7 @@ describe("Slant Protocol API", function() {
       });
     });
 
-    it("should change george vote for something - Evaluations", function () {
+    xit("should change george vote for something - Evaluations", function () {
       return util.evaluation.create({
         'userId': george.id,
         'biddingId': abbey.id,
@@ -132,11 +133,11 @@ describe("Slant Protocol API", function() {
           'value': 0
         }]
       }).then(function(res) {
-        console.log(res);
+        //console.log(res);
         expect(res.body[0]).to.be.equal(georgeEvalIdOfsomething);
         return util.evaluation.get(georgeEvalIdOfsomething);
       }).then(function(res) {
-        console.log(res);
+        //console.log(res);
         var eval = res.body;
         expect(eval.id).to.be.equal(georgeEvalIdOfsomething);
         expect(eval.value).to.be.equal(0);
