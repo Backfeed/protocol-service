@@ -4,15 +4,15 @@
     "envVars": [],
     "optimize": true
   },
-  "handler": "biddings/getbidding/handler.handler",
-  "name": "getbidding",
+  "handler": "contributions/getcontribution2/handler.handler",
+  "name": "getcontribution2",
   "runtime": "nodejs",
   "timeout": 6,
   "memorySize": 1024,
   "eventSourceArn": "",
   "endpoints": [
     {
-      "path": "biddings/{id}",
+      "path": "contributions/{id}",
       "method": "GET",
       "authorizationType": "none",
       "apiKeyRequired": true,

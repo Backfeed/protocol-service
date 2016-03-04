@@ -4,15 +4,15 @@
     "envVars": [],
     "optimize": true
   },
-  "handler": "contributions/getcontribution/handler.handler",
-  "name": "getcontribution",
+  "handler": "users/getuser2/handler.handler",
+  "name": "getuser2",
   "runtime": "nodejs",
   "timeout": 6,
   "memorySize": 1024,
   "eventSourceArn": "",
   "endpoints": [
     {
-      "path": "contributions/{id}",
+      "path": "users/{id}",
       "method": "GET",
       "authorizationType": "none",
       "apiKeyRequired": true,

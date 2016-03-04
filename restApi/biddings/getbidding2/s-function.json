@@ -4,15 +4,15 @@
     "envVars": [],
     "optimize": true
   },
-  "handler": "users/getuser/handler.handler",
-  "name": "getuser",
+  "handler": "biddings/getbidding2/handler.handler",
+  "name": "getbidding2",
   "runtime": "nodejs",
   "timeout": 6,
   "memorySize": 1024,
   "eventSourceArn": "",
   "endpoints": [
     {
-      "path": "users/{id}",
+      "path": "biddings/{id}",
       "method": "GET",
       "authorizationType": "none",
       "apiKeyRequired": true,
