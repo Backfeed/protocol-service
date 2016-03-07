@@ -48,10 +48,10 @@ function evaluate(uid, value, evaluators, evaluations, cachedRep, bidCreationTim
     evaluators = addVoteValueToEvaluators(evaluators, evaluations);
     iMap = iMap.set('newRep', getCurrentUserFrom(evaluators, uid).reputation);
     iMap = iMap.set('voteRep', getVoteRep(evaluators, value));
-    iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
+    //iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
 
 
-    evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, iMap.get('totalVoteRep'), bidCreationTime);
+    evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, bidCreationTime);
 
     //evaluators = updateEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'));
 
@@ -98,8 +98,8 @@ function burnStakeForCurrentUser(currentUserRep, fee) {
   return math.mul(currentUserRep, toMultiply).toNumber();
 }
 
-function stakeFee(currentUserRep, totalVoteRep, cachedRep, bidDuration, tSinceStartOfBid) {
-  var repFactor = math.sub(1, math.pow(math.div(math.sub(totalVoteRep, currentUserRep), cachedRep), GAMMA));
+function stakeFee(currentUserRep, voteRep, cachedRep, bidDuration, tSinceStartOfBid) {
+  var repFactor = math.sub(1, math.pow(math.div(math.sub(voteRep, currentUserRep), cachedRep), GAMMA));
   var timeFactor = math.sub(1, math.div(tSinceStartOfBid, bidDuration));
   return math.mul(repFactor, timeFactor).toNumber();
 }
@@ -113,7 +113,7 @@ function getSameEvaluatorsAddValue(newRep, factor, evaluatorRep, voteRep) {
                 .toNumber();
 }
 
-function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, currentEvaluationValue, currentUserId, totalVoteRep, bidCreationTime) {
+function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, currentEvaluationValue, currentUserId, bidCreationTime) {
   var toAdd;
   var factor = math.pow(math.div(voteRep, cachedRep).toNumber(), ALPHA).toNumber();
   return _.map(evaluators, function(evaluator) {
@@ -121,7 +121,7 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
     if ( evaluator.id === currentUserId ) {
       var tSinceStarted = math.sub(Date.now(), bidCreationTime).toNumber();
       util.log.info("tSinceStarted : ", tSinceStarted, " , bidCreationTime : ", bidCreationTime);
-      var fee = stakeFee(evaluator.reputation, totalVoteRep, cachedRep, DURATION, tSinceStarted);
+      var fee = stakeFee(evaluator.reputation, voteRep, cachedRep, DURATION, tSinceStarted);
       // why? once a user pays himself he can profit only by evaluating - risk free
       //toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
       //evaluator.reputation = math.add(burnStakeForCurrentUser(newRep, fee), toAdd).toNumber();
