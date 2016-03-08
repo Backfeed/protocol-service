@@ -98,8 +98,8 @@ function burnStakeForCurrentUser(currentUserRep, fee) {
   return math.mul(currentUserRep, toMultiply).toNumber();
 }
 
-function stakeFee(currentUserRep, voteRep, cachedRep, bidDuration, tSinceStartOfBid) {
-  var repFactor = math.sub(1, math.pow(math.div(math.sub(voteRep, currentUserRep), cachedRep), GAMMA));
+function stakeFee(voteRep, cachedRep, bidDuration, tSinceStartOfBid) {
+  var repFactor = math.sub(1, math.pow(math.div(voteRep, cachedRep), GAMMA));
   var timeFactor = math.sub(1, math.div(tSinceStartOfBid, bidDuration));
   return math.mul(repFactor, timeFactor).toNumber();
 }
@@ -121,7 +121,7 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
     if ( evaluator.id === currentUserId ) {
       var tSinceStarted = math.sub(Date.now(), bidCreationTime).toNumber();
       util.log.info("tSinceStarted : ", tSinceStarted, " , bidCreationTime : ", bidCreationTime);
-      var fee = stakeFee(evaluator.reputation, voteRep, cachedRep, DURATION, tSinceStarted);
+      var fee = stakeFee(voteRep, cachedRep, DURATION, tSinceStarted);
       // why? once a user pays himself he can profit only by evaluating - risk free
       //toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
       //evaluator.reputation = math.add(burnStakeForCurrentUser(newRep, fee), toAdd).toNumber();
