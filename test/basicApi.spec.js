@@ -60,9 +60,9 @@ describe("Slant Protocol API", function() {
         pete   = users[4];
 
         expect(george.createdAt).to.be.a('number');
-        expect(paul.tokens).to.equal(11);
+        expect(paul.tokens).to.equal(util.initialTokens);
         expect(john.id).to.have.length.above(2);
-        expect(ringo.reputation).to.equal(0.2);
+        expect(ringo.reputation).to.equal(util.initialReputation);
       });
     });
 
@@ -111,7 +111,6 @@ describe("Slant Protocol API", function() {
           'value': 1
         }]
       }).then(function(res) {
-        console.log(res);
         georgeEvalIdOfsomething = res.body[0];
         expect(georgeEvalIdOfsomething).to.have.length.above(14);
         expect(georgeEvalIdOfsomething).to.be.a('string');
@@ -133,11 +132,9 @@ describe("Slant Protocol API", function() {
           'value': 0
         }]
       }).then(function(res) {
-        //console.log(res);
         expect(res.body[0]).to.be.equal(georgeEvalIdOfsomething);
         return util.evaluation.get(georgeEvalIdOfsomething);
       }).then(function(res) {
-        //console.log(res);
         var eval = res.body;
         expect(eval.id).to.be.equal(georgeEvalIdOfsomething);
         expect(eval.value).to.be.equal(0);
