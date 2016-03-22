@@ -11,6 +11,7 @@
     "sanity": "mocha test/basicApi.spec.js",
     "endBidding": "mocha test/endBidding.spec.js",
     "protocol": "mocha test/ut.protocol.spec.js -w",
+    "elad": "mocha test/protocol.spec.js -w",
     "start": "npm run localtest"
   },
   "repository": {
