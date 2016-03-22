@@ -26,6 +26,8 @@ module.exports = {
     delete: deleteEvaluation
   },
 
+  initialTokens: +process.env.USER_INITIAL_TOKENS,
+  initialReputation: +process.env.USER_INITIAL_REPUTATION,
   cleanseDB: cleanseDB,
   getCachedRep: getCachedRep,
 
@@ -45,8 +47,8 @@ var math    = require('decimal.js');
 var Promise = require('promise');
 
 
-// var URL = 'http://localhost:1465';
-var URL = 'https://api.backfeed.cc/slant';
+var URL = 'http://localhost:1465';
+// var URL = 'https://api.backfeed.cc/dev';
 
 var params =  {
   headers: { 'x-api-key': process.env.X_API_KEY }

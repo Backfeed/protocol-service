@@ -9,6 +9,7 @@
   "plugins": [
     "serverless-lambda-prune-plugin",
     "serverless-optimizer-plugin",
+    "serverless-serve",
     "serverless-resources-validation-plugin"
   ],
   "cloudFormation": {
