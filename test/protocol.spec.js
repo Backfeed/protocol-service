@@ -74,7 +74,7 @@ describe("Test protocol according to excel", function() {
       })
       .then(function(res) {
         p1 = res.body;
-        console.log("p1 : ", p1);
+        // console.log("p1 : ", p1);
         /* the user starts with config.USER_INITIAL_TOKENS
          * and pays config.CONTRIBUTION_FEE
          */
