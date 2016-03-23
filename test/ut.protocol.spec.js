@@ -91,20 +91,19 @@ describe("Unit Test Protocol", function() {
     expect(protocol.stakeFee(1, 4, 100, 50)).to.be.equal(0.25);
 
     // TODO: raise an error when tSinceStartOfBid > bidDuration
-
     // (this _will_ happen with the code as it is now)
     // expect(protocol.stakeFee(1, 4, 100, 150)).to.be.equal("OURUSERGETSRICHFORFREE");
-    // TODO: raise an error when tSinceStartOfBid > bidDuration
-    // expect(protocol.stakeFee(1, 4, 100, 150)).to.be.equal("OURUSERGETSRICHFORFREE");
 
-    // TODO: original (broken) test, remove when we are sure this is not intentional
-    // expect(protocol.stakeFee(1, 5, 100, 8640000, 4320000)).to.be.equal(0.42752203363223046);
+    // when called with just two arguments, the time factor is just ignored
+    expect(protocol.stakeFee(0, 4)).to.be.equal(1);
+    expect(protocol.stakeFee(1, 4)).to.be.equal(0.5);
+    expect(protocol.stakeFee(4, 4)).to.be.equal(0);
   })
 
   it("should addVoteValueToEvaluators", function () {
     expect(protocol.addVoteValueToEvaluators(evaluators, evaluations).length).to.be.equal(3);
   });
-
+ 
   it("should getVoteRep", function () {
     expect(protocol.getVoteRep(evaluators, 1)).to.be.equal(.6);
   });

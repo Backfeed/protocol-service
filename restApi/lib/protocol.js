@@ -91,8 +91,17 @@ function burnStakeForCurrentUser(currentUserRep, fee) {
 }
 
 function stakeFee(voteRep, cachedRep, bidDuration, tSinceStartOfBid) {
+  // the stakefee calculates the amount of rep you put at stake when you evaluate something
+  // the fee depends on the amount of reputation compared to the total value
+  // and, optionally, on the time the bid is made
+
   var repFactor = math.sub(1, math.pow(math.div(voteRep, cachedRep), GAMMA));
-  var timeFactor = math.sub(1, math.div(tSinceStartOfBid, bidDuration));
+  var timeFactor
+  if (bidDuration !== undefined &&  tSinceStartOfBid !== undefined) {
+    timeFactor = math.sub(1, math.div(tSinceStartOfBid, bidDuration));
+  } else {
+    timeFactor = 1;
+  }
   return math.mul(repFactor, timeFactor).toNumber();
 }
 
