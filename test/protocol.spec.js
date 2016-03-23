@@ -2,6 +2,7 @@ var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
 var _                 = require('underscore');
 var chakram           = require('chakram');
 var util              = require('./util.js');
+var config            = require('../restApi/lib/config.js');
 
 expect = chakram.expect;
 
@@ -54,10 +55,10 @@ describe.only("Test protocol according to excel", function() {
       .then(function(res) {
         p1 = res.body;
         console.log("p1 : ", p1);
-        /* the user starts with process.env.USER_INITIAL_TOKENS
-         * and pays process.env.CONTRIBUTION_FEE
+        /* the user starts with config.USER_INITIAL_TOKENS
+         * and pays config.CONTRIBUTION_FEE
          */
-        expect(p1.tokens).to.be.equal( process.env.USER_INITIAL_TOKENS - process.env.CONTRIBUTION_FEE);
+        expect(p1.tokens).to.be.equal( config.USER_INITIAL_TOKENS - config.CONTRIBUTION_FEE);
         return chakram.wait();
       });
   });

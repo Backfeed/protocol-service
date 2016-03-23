@@ -2,17 +2,18 @@ var Immutable = require('immutable');
 var _         = require('underscore');
 var math      = require('decimal.js');
 var util      = require('./helper');
+var config    = require('./config')
 
-var STAKE               = parseFloat(process.env.STAKE);
-var ALPHA               = parseFloat(process.env.ALPHA);
-//var BETA                = parseFloat(process.env.BETA);
-var GAMMA               = parseFloat(process.env.GAMMA);
-var TOKEN_REWARD_FACTOR = parseFloat(process.env.TOKEN_REWARD_FACTOR);
-var REP_REWARD_FACTOR   = parseFloat(process.env.REP_REWARD_FACTOR);
-var CONTRIBUTION_FEE    = parseFloat(process.env.CONTRIBUTION_FEE);
-var DURATION            = parseFloat(process.env.DURATION);
-var DISTRIBUTION_STAKE  = parseFloat(process.env.DISTRIBUTION_STAKE);
-var REWARD_THRESHOLD    = parseFloat(process.env.REWARD_THRESHOLD);
+var STAKE               = parseFloat(config.STAKE);
+var ALPHA               = parseFloat(config.ALPHA);
+//var BETA                = parseFloat(config.BETA);
+var GAMMA               = parseFloat(config.GAMMA);
+var TOKEN_REWARD_FACTOR = parseFloat(config.TOKEN_REWARD_FACTOR);
+var REP_REWARD_FACTOR   = parseFloat(config.REP_REWARD_FACTOR);
+var CONTRIBUTION_FEE    = parseFloat(config.CONTRIBUTION_FEE);
+var DURATION            = parseFloat(config.DURATION);
+var DISTRIBUTION_STAKE  = parseFloat(config.DISTRIBUTION_STAKE);
+var REWARD_THRESHOLD    = parseFloat(config.REWARD_THRESHOLD);
 
 module.exports = {
   evaluate                  : evaluate,
@@ -49,10 +50,8 @@ function evaluate(uid, newRep, value, evaluators, evaluations, cachedRep, bidCre
     iMap = iMap.set('voteRep', getVoteRep(evaluators, value));
     //iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
 
-
     evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, bidCreationTime);
-
-    //evaluators = updateEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'));
+    // evaluators = updateEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'));
 
     evaluators = cleanupEvaluators(evaluators);
   }
@@ -133,18 +132,18 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
 }
 
 // In Version 0.0.2 this function was removed
-//function updateEvaluatorsRep(evaluators, currentUserRep, cachedRep) {
+// function updateEvaluatorsRep(evaluators, currentUserRep, cachedRep) {
 //  var factor = math.pow(math.div(currentUserRep, cachedRep).toNumber(), BETA).toNumber();
 //  var toDivide = new math(1)
 //                        .sub(math.mul(STAKE, factor).toNumber())
 //                        .toNumber();
-//
+
 //  return _.map(evaluators, function(evaluator) {
 //    evaluator.reputation = math.div(evaluator.reputation, toDivide).toNumber();
 //    return evaluator;
 //  });
-//
-//}
+
+// }
 
 function cleanupEvaluators(evaluators) {
   return _.map(evaluators, function(evaluator) {
