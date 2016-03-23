@@ -6,7 +6,8 @@ module.exports = {
   getContributionEvaluations  : getContributionEvaluations,
   getContributionUsers        : getContributionUsers,
   deleteContribution          : deleteContribution,
-  getContributionScore        : getContributionScore
+  getContributionScore        : getContributionScore,
+  addToMaxScore               : addToMaxScore
 };
 
 var async           = require('async');
@@ -25,6 +26,7 @@ function createContribution(event, cb) {
     "id": util.uuid(),
     "userId": event.userId,
     "biddingId": event.biddingId,
+    "maxScore": 0,
     "createdAt": Date.now()
   };
 
@@ -128,4 +130,17 @@ function deleteContribution(event, cb) {
   };
 
   return db.del(params, cb);
+}
+
+function addToMaxScore(id, newRep, cb) {
+  var params = {
+    TableName : config.tables.contributions,
+    Key: { id: id },
+    UpdateExpression: 'set #score = #score + :v',
+    ExpressionAttributeNames: { '#score' : 'maxScore' },
+    ExpressionAttributeValues: { ':v' : newRep },
+    ReturnValues: 'ALL_NEW'
+  }
+
+  db.update(params, cb);
 }

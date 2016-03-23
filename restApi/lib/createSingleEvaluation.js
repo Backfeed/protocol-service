@@ -9,6 +9,7 @@ var getCachedRep      = require('./getCachedRep');
 var protocol          = require('./protocol');
 var usersLib          = require('./users');
 var evaluationsLib    = require('./evaluations');
+var contributionsLib  = require('./contributions');
 
 // Lambda Handler
 module.exports.execute = function(event, bidCreationTime, cb) {
@@ -16,7 +17,6 @@ module.exports.execute = function(event, bidCreationTime, cb) {
   util.log.info('event', event);
 
   var iMap = Immutable.Map({
-    newRep: 0,
     voteRep: 0,
     contributionRep: 0,
     cachedRep: 0
@@ -45,7 +45,6 @@ module.exports.execute = function(event, bidCreationTime, cb) {
 
     function(results, waterfallCB) {
       iMap = iMap.set('cachedRep', results.cachedRep.theValue);
-      util.log.info('cachedRep', iMap.get('cachedRep'));
       evaluations = results.evaluations;
 
       var currentUserFormerEvaluation = _.findWhere(evaluations, { userId: event.userId });
@@ -68,17 +67,27 @@ module.exports.execute = function(event, bidCreationTime, cb) {
       }
 
       evaluations.push(event);
-      util.log.info('evaluations', evaluations);
       usersLib.getEvaluators(evaluations, waterfallCB);
 
     },
 
-    function(result, waterfallCB) {
-      evaluators = result;
+    function(evaluators, waterfallCB) {
+      var currentUser = getCurrentUserFrom(evaluators, event.userId);
+      var newRep = currentUser.reputation;
+      evaluators = protocol.evaluate(event.userId, newRep, event.value, evaluators, evaluations, iMap.get('cachedRep'), bidCreationTime);
+      async.parallel({
+        updateEvaluatorsRep: function(parallelCB) {
+          usersLib.updateEvaluatorsRepToDb(evaluators, parallelCB);
+        },
+        updateContriubtionMaxScore: function(parallelCB) {
+          if (event.value === 1) {
+            contributionsLib.addToMaxScore(event.contributionId, newRep, parallelCB);
+          } else {
+            parallelCB();
+          }
+        }
+      }, waterfallCB)
 
-      evaluators = protocol.evaluate(event.userId, event.value, evaluators, evaluations, iMap.get('cachedRep'), bidCreationTime);
-      util.log.info('evaluators', evaluators);
-      usersLib.updateEvaluatorsRepToDb(evaluators, waterfallCB);
     }
 
   ],
@@ -89,3 +98,8 @@ module.exports.execute = function(event, bidCreationTime, cb) {
 
 };
 
+function getCurrentUserFrom(evaluators, currentUserId) {
+  return _.find(evaluators, function(evaluator) {
+    return evaluator.id === currentUserId;
+  });
+}
