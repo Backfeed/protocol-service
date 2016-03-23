@@ -6,6 +6,26 @@ var config            = require('../restApi/lib/config.js');
 
 expect = chakram.expect;
 
+// This test tests one particular scenario of how reputation evolves
+// when evaluation contributions 
+// It assumes:
+// - an initial distribution of reputation of 0.2 [config.USER_INITIAL_TOKENS]
+// - 5 users which made 2 contributions
+// - a specific turn of events:
+//   1- P1  evaluates  C1  by  1  at time  10000
+//   2- P2  evaluates  C1  by  0  at time  20000
+//   3- P3  evaluates  C1  by  1  at time  30000
+//   4- P4  evaluates  C2  by  1  at time  40000
+//   5- P5  evaluates  C2  by  0  at time  50000
+//   6- P1  evaluates  C2  by  1  at time  60000
+
+// TODO: generalize the schema to test different scenarios
+
+// since reputation is calculated on the base of passed time
+// we cannot be really sure of the resulting values
+// delta expresses how much we are allowed to be off the
+var delta = 0.05
+
 describe("Test protocol according to excel", function() {
   var biddingId;
   var contributionId1;
@@ -33,7 +53,7 @@ describe("Test protocol according to excel", function() {
         p5 = users[4];
         return chakram.wait();
       });
-  });
+  })
 
   //after('reset db', function() {
   //  return util.cleanseDB().then(function(res) {
@@ -63,6 +83,7 @@ describe("Test protocol according to excel", function() {
       });
   });
 
+  //   1- P1  evaluates  C1  by  1  at time  10000
   it("should distribute rep according to step 1", function() {
     return util.evaluation.create({
         biddingId: biddingId,
@@ -78,26 +99,26 @@ describe("Test protocol according to excel", function() {
           util.user.get(p5.id)
         ];
         return chakram.all(arr);
-      }).then(function(res) {
+      })
+      .then(function(res) {
         p1 = res[0].body;
         p2 = res[1].body;
         p3 = res[2].body;
         p4 = res[3].body;
         p5 = res[4].body;
-        expect(p1.reputation).to.be.closeTo(0.196437, 0.000005);
-        return util.delayedGetCachedRep();
-      }).then(function(res) {
-        expect(res.body.theValue).to.be.closeTo(0.996437, 0.000005);
+        expect(p1.reputation).to.be.closeTo(0.196437, delta);
         return chakram.wait();
-      });
+      })
   });
 
+  //   2- P2  evaluates  C1  by  0  at time  20000
   it("should distribute rep according to step 2", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p2.id,
       evaluations: [{ contributionId: contributionId1, value: 0 }]
-    }).then(function(res) {
+    })
+    .then(function(res) {
       arr = [
         util.user.get(p1.id),
         util.user.get(p2.id),
@@ -106,27 +127,26 @@ describe("Test protocol according to excel", function() {
         util.user.get(p5.id)
       ];
       return chakram.all(arr);
-    }).then(function(res) {
+    })
+    .then(function(res) {
       p1 = res[0].body;
       p2 = res[1].body;
       p3 = res[2].body;
       p4 = res[3].body;
       p5 = res[4].body;
-      expect(p1.reputation).to.be.closeTo(0.198428, 0.000005);
-      expect(p2.reputation).to.be.closeTo(0.196452, 0.000005);
-      return util.delayedGetCachedRep();
-    }).then(function(res) {
-      cachedRep = res.body.theValue;
-      expect(cachedRep).to.be.closeTo(0.994880, 0.000005);
-    });
+      expect(p1.reputation).to.be.closeTo(0.198428, delta);
+      expect(p2.reputation).to.be.closeTo(0.196452, delta);
+    })
   });
 
+  //   3- P3  evaluates  C1  by  1  at time  30000
   it("should distribute rep according to step 3", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p3.id,
       evaluations: [{ contributionId: contributionId1, value: 1 }]
-    }).then(function(res) {
+    })
+    .then(function(res) {
       arr = [
         util.user.get(p1.id),
         util.user.get(p2.id),
@@ -135,27 +155,26 @@ describe("Test protocol according to excel", function() {
         util.user.get(p5.id)
       ];
       return chakram.all(arr);
-    }).then(function(res) {
+    })
+    .then(function(res) {
       p1 = res[0].body;
       p2 = res[1].body;
       p3 = res[2].body;
       p4 = res[3].body;
       p5 = res[4].body;
-      expect(p1.reputation).to.be.closeTo(0.194881, 0.000005);
-      expect(p2.reputation).to.be.closeTo(0.196452, 0.000005);
-      return util.delayedGetCachedRep();
-    }).then(function(res) {
-      cachedRep = res.body.theValue;
-      expect(cachedRep).to.be.closeTo(0.991333, 0.000005);
-    });
+      expect(p1.reputation).to.be.closeTo(0.194881, delta);
+      expect(p2.reputation).to.be.closeTo(0.196452, delta);
+    })
   });
 
+  //   4- P4  evaluates  C2  by  1  at time  40000
   it("should distribute rep according to step 4", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p4.id,
       evaluations: [{ contributionId: contributionId2, value: 1 }]
-    }).then(function(res) {
+    })
+    .then(function(res) {
       arr = [
         util.user.get(p1.id),
         util.user.get(p2.id),
@@ -164,28 +183,27 @@ describe("Test protocol according to excel", function() {
         util.user.get(p5.id)
       ];
       return chakram.all(arr);
-    }).then(function(res) {
+    })
+    .then(function(res) {
       p1 = res[0].body;
       p2 = res[1].body;
       p3 = res[2].body;
       p4 = res[3].body;
       p5 = res[4].body;
-      expect(p1.reputation).to.be.closeTo(0.200013, 0.000005);
-      expect(p2.reputation).to.be.closeTo(0.198454, 0.000005);
-      expect(p3.reputation).to.be.closeTo(0.195165, 0.000005);
-      return util.delayedGetCachedRep();
-    }).then(function(res) {
-      cachedRep = res.body.theValue;
-      expect(cachedRep).to.be.closeTo(0.993632, 0.000005);
-    });
+      expect(p1.reputation).to.be.closeTo(0.200013, delta);
+      expect(p2.reputation).to.be.closeTo(0.198454, delta);
+      expect(p3.reputation).to.be.closeTo(0.195165, delta);
+    })
   });
 
+  //   5- P5  evaluates  C2  by  0  at time  50000
   it("should distribute rep according to step 5", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p5.id,
       evaluations: [{ contributionId: contributionId2, value: 0 }]
-    }).then(function(res) {
+    })
+    .then(function(res) {
       arr = [
         util.user.get(p1.id),
         util.user.get(p2.id),
@@ -194,29 +212,28 @@ describe("Test protocol according to excel", function() {
         util.user.get(p5.id)
       ];
       return chakram.all(arr);
-    }).then(function(res) {
+    })
+    .then(function(res) {
       p1 = res[0].body;
       p2 = res[1].body;
       p3 = res[2].body;
       p4 = res[3].body;
       p5 = res[4].body;
-      expect(p1.reputation).to.be.closeTo(0.204674, 0.000005);
-      expect(p2.reputation).to.be.closeTo(0.200472, 0.000005);
-      expect(p3.reputation).to.be.closeTo(0.199713, 0.000005);
-      expect(p4.reputation).to.be.closeTo(0.194559, 0.000005);
-      return util.delayedGetCachedRep();
-    }).then(function(res) {
-      cachedRep = res.body.theValue;
-      expect(cachedRep).to.be.closeTo(0.999418, 0.000005);
-    });
+      expect(p1.reputation).to.be.closeTo(0.204674, delta);
+      expect(p2.reputation).to.be.closeTo(0.200472, delta);
+      expect(p3.reputation).to.be.closeTo(0.199713, delta);
+      expect(p4.reputation).to.be.closeTo(0.194559, delta);
+    })
   });
 
+  //   6- P1  evaluates  C2  by  1  at time  60000
   it("should distribute rep according to step 6", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p1.id,
       evaluations: [{ contributionId: contributionId2, value: 1 }]
-    }).then(function(res) {
+    })
+    .then(function(res) {
       arr = [
         util.user.get(p1.id),
         util.user.get(p2.id),
@@ -225,22 +242,19 @@ describe("Test protocol according to excel", function() {
         util.user.get(p5.id)
       ];
       return chakram.all(arr);
-    }).then(function(res) {
+    })
+    .then(function(res) {
       p1 = res[0].body;
       p2 = res[1].body;
       p3 = res[2].body;
       p4 = res[3].body;
       p5 = res[4].body;
-      expect(p1.reputation).to.be.closeTo(0.206743, 0.000005);
-      expect(p2.reputation).to.be.closeTo(0.205699, 0.000005);
-      expect(p3.reputation).to.be.closeTo(0.201731, 0.000005);
-      expect(p4.reputation).to.be.closeTo(0.196525, 0.000005);
-      expect(p5.reputation).to.be.closeTo(0.195114, 0.000005);
-      return util.delayedGetCachedRep();
-    }).then(function(res) {
-      cachedRep = res.body.theValue;
-      expect(cachedRep).to.be.closeTo(1.005812, 0.000005);
-    });
+      expect(p1.reputation).to.be.closeTo(0.206743, delta);
+      expect(p2.reputation).to.be.closeTo(0.205699, delta);
+      expect(p3.reputation).to.be.closeTo(0.201731, delta);
+      expect(p4.reputation).to.be.closeTo(0.196525, delta);
+      expect(p5.reputation).to.be.closeTo(0.195114, delta);
+    })
   });
 
  

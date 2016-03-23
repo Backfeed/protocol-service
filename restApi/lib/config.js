@@ -3,7 +3,7 @@
 var config = {
   	tables: getTables(),
 	USER_INITIAL_TOKENS: 100, 
-	USER_INITIAL_REPUTATION: 0, 
+	USER_INITIAL_REPUTATION: 0.2, 
 	STAKE: 0.02, 
 	ALPHA: 0.7, 
 	GAMMA: 0.5, 
