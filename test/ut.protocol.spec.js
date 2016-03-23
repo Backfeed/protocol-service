@@ -84,7 +84,9 @@ describe("Unit Test Protocol", function() {
   });
 
   it("should getSameEvaluatorsAddValue", function () {
-    expect(protocol.getSameEvaluatorsAddValue(.1,.8,.1,.4)).to.be.equal(.002);
+    // this test presumes that config.DISTRIBUTION_STAKE is 0.8
+    expect(config.DISTRIBUTION_STAKE).to.be.equal(0.08)
+    expect(protocol.getSameEvaluatorsAddValue(.1,.8,.1,.4)).to.be.equal(.0016);
   });
 
   xit("should updateSameEvaluatorsRep", function () {
