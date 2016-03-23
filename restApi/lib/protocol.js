@@ -33,20 +33,19 @@ module.exports = {
   //updateEvaluatorsRep       : updateEvaluatorsRep
 };
 
-function evaluate(uid, value, evaluators, evaluations, cachedRep, bidCreationTime) {
+function evaluate(uid, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime) {
 
   // In the current slant protocol, only up-votes are counted for
   if (parseInt(value) !== 0) {
 
     var iMap = Immutable.Map({
-      newRep: 0,
+      newRep: newRep,
       voteRep: 0,
       totalVoteRep: 0,
       cachedRep: cachedRep
     });
 
     evaluators = addVoteValueToEvaluators(evaluators, evaluations);
-    iMap = iMap.set('newRep', getCurrentUserFrom(evaluators, uid).reputation);
     iMap = iMap.set('voteRep', getVoteRep(evaluators, value));
     //iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
 
@@ -85,12 +84,6 @@ function getTotalVotedRep(evaluators) {
     toAdd = evaluator.reputation;
     return math.add(memo,toAdd).toNumber();
   }, 0);
-}
-
-function getCurrentUserFrom(evaluators, currentUserId) {
-  return _.find(evaluators, function(evaluator) {
-    return evaluator.id === currentUserId;
-  });
 }
 
 function burnStakeForCurrentUser(currentUserRep, fee) {
