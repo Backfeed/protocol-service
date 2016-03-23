@@ -53,7 +53,11 @@ describe.only("Test protocol according to excel", function() {
       })
       .then(function(res) {
         p1 = res.body;
-        expect(p1.tokens).to.be.equal(10);
+        console.log("p1 : ", p1);
+        /* the user starts with process.env.USER_INITIAL_TOKENS
+         * and pays process.env.CONTRIBUTION_FEE
+         */
+        expect(p1.tokens).to.be.equal( process.env.USER_INITIAL_TOKENS - process.env.CONTRIBUTION_FEE);
         return chakram.wait();
       });
   });
