@@ -9,6 +9,7 @@ var util = {
   uuid  : uuid.v4,
   sumRep: sumRep,
   math  : math,
+  shout : shout,
   log   : logger.log
 };
 
@@ -20,3 +21,8 @@ function sumRep(users) {
   }, 0);
 }
 
+function shout() {
+  console.log('\n\n**************************')
+  console.log.apply(null, arguments);
+  console.log('**************************\n\n')
+}
