@@ -6,7 +6,7 @@ var config            = require('../restApi/lib/config.js');
 
 expect = chakram.expect;
 
-describe.only("Test protocol according to excel", function() {
+describe("Test protocol according to excel", function() {
   var biddingId;
   var contributionId1;
   var contributionId2;
