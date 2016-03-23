@@ -72,8 +72,34 @@ describe("Unit Test Protocol", function() {
   });
 
   it("should return the stake fee", function () {
-    expect(protocol.stakeFee(1, 5, 100, 8640000, 4320000)).to.be.equal(0.42752203363223046);
-  });
+    // check sanity: the stakeFee calculation depends on config.GAMMA
+    expect(config.GAMMA).to.be.equal(.5)
+    // stakeFee arguments are: voteRep, cachedRep, bidDuration, tSinceStartOfBid
+    expect(protocol.stakeFee(1, 100, 8640000, 4320000)).to.be.equal(0.45);
+    expect(protocol.stakeFee(1, 5, 8640000, 4320000)).to.be.equal(0.276393202250021);
+    expect(protocol.stakeFee(1, 5, 8640000, 4320000)).to.be.equal(0.276393202250021);
+
+    // limit case: zero reputation
+    expect(protocol.stakeFee(0, 5, 8640000, 4320000)).to.be.equal(0.5);
+    // limit case: all reputation 
+    expect(protocol.stakeFee(1, 1, 8640000, 4320000)).to.be.equal(0);
+    // limit case: last minute 
+    expect(protocol.stakeFee(1, 4, 100, 100)).to.be.equal(0);
+    // limit case: time 0 
+    expect(protocol.stakeFee(1, 4, 100, 0)).to.be.equal(0.5);
+    // limit case: time 0 
+    expect(protocol.stakeFee(1, 4, 100, 50)).to.be.equal(0.25);
+
+    // TODO: raise an error when tSinceStartOfBid > bidDuration
+
+    // (this _will_ happen with the code as it is now)
+    // expect(protocol.stakeFee(1, 4, 100, 150)).to.be.equal("OURUSERGETSRICHFORFREE");
+    // TODO: raise an error when tSinceStartOfBid > bidDuration
+    // expect(protocol.stakeFee(1, 4, 100, 150)).to.be.equal("OURUSERGETSRICHFORFREE");
+
+    // TODO: original (broken) test, remove when we are sure this is not intentional
+    // expect(protocol.stakeFee(1, 5, 100, 8640000, 4320000)).to.be.equal(0.42752203363223046);
+  })
 
   it("should addVoteValueToEvaluators", function () {
     expect(protocol.addVoteValueToEvaluators(evaluators, evaluations).length).to.be.equal(3);
@@ -100,3 +126,4 @@ describe("Unit Test Protocol", function() {
   //  expect(protocol.updateEvaluatorsRep(evaluators,.1,1)[2].reputation).to.be.closeTo(.3045453,.0000001);
   //});
 });
+
