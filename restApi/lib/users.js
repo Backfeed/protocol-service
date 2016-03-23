@@ -22,8 +22,8 @@ function createUser(event, cb) {
 
   var newUser = {
     "id": util.uuid(),
-    "tokens": event.tokens || parseFloat(process.env.USER_INITIAL_TOKENS),
-    "reputation": event.reputation || parseFloat(process.env.USER_INITIAL_REPUTATION),
+    "tokens": event.tokens || parseFloat(config.USER_INITIAL_TOKENS),
+    "reputation": event.reputation || parseFloat(config.USER_INITIAL_REPUTATION),
     "referral": event.referral,
     "biddingCount": 0,
     "createdAt": Date.now()
@@ -84,6 +84,11 @@ function deleteUser(event, cb) {
 }
 
 function updateUser(event, cb) {
+  /* update user info with information given by event
+
+  user is identified by event.id
+  */ 
+
   var params = {
     TableName: config.tables.users,
     Key: {
