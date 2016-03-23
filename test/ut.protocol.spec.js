@@ -3,16 +3,17 @@ var _                 = require('underscore');
 var expect            = require('chai').expect;
 var util              = require('./util');
 var protocol          = require('../restApi/lib/protocol.js');
+var config            = require('../restApi/lib/config.js');
 
-var STAKE               = parseFloat(process.env.STAKE);
-var ALPHA               = parseFloat(process.env.ALPHA);
-//var BETA                = parseFloat(process.env.BETA);
-var GAMMA               = parseFloat(process.env.GAMMA);
-var TOKEN_REWARD_FACTOR = parseFloat(process.env.TOKEN_REWARD_FACTOR);
-var REP_REWARD_FACTOR   = parseFloat(process.env.REP_REWARD_FACTOR);
-var CONTRIBUTION_FEE    = parseFloat(process.env.CONTRIBUTION_FEE);
-var DURATION            = parseFloat(process.env.DURATION);
-var DISTRIBUTION_STAKE  = parseFloat(process.env.DISTRIBUTION_STAKE);
+var STAKE               = parseFloat(config.STAKE);
+var ALPHA               = parseFloat(config.ALPHA);
+//var BETA                = parseFloat(config.BETA);
+var GAMMA               = parseFloat(config.GAMMA);
+var TOKEN_REWARD_FACTOR = parseFloat(config.TOKEN_REWARD_FACTOR);
+var REP_REWARD_FACTOR   = parseFloat(config.REP_REWARD_FACTOR);
+var CONTRIBUTION_FEE    = parseFloat(config.CONTRIBUTION_FEE);
+var DURATION            = parseFloat(config.DURATION);
+var DISTRIBUTION_STAKE  = parseFloat(config.DISTRIBUTION_STAKE);
 
 describe("Unit Test Protocol", function() {
 
