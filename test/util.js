@@ -99,7 +99,7 @@ function toBody(x) {
 }
 
 function parseProtocol(n) {
-  return math.round(n);
+  return +math.round(n);
 }
 
 function promisedTimeout() {

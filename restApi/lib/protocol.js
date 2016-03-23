@@ -4,16 +4,16 @@ var math      = require('decimal.js');
 var util      = require('./helper');
 var config    = require('./config')
 
-var STAKE               = parseFloat(config.STAKE);
-var ALPHA               = parseFloat(config.ALPHA);
-//var BETA                = parseFloat(config.BETA);
-var GAMMA               = parseFloat(config.GAMMA);
-var TOKEN_REWARD_FACTOR = parseFloat(config.TOKEN_REWARD_FACTOR);
-var REP_REWARD_FACTOR   = parseFloat(config.REP_REWARD_FACTOR);
-var CONTRIBUTION_FEE    = parseFloat(config.CONTRIBUTION_FEE);
-var DURATION            = parseFloat(config.DURATION);
-var DISTRIBUTION_STAKE  = parseFloat(config.DISTRIBUTION_STAKE);
-var REWARD_THRESHOLD    = parseFloat(config.REWARD_THRESHOLD);
+var STAKE               = +config.STAKE;
+var ALPHA               = +config.ALPHA;
+//var BETA                = +config.BETA;
+var GAMMA               = +config.GAMMA;
+var TOKEN_REWARD_FACTOR = +config.TOKEN_REWARD_FACTOR;
+var REP_REWARD_FACTOR   = +config.REP_REWARD_FACTOR;
+var CONTRIBUTION_FEE    = +config.CONTRIBUTION_FEE;
+var DURATION            = +config.DURATION;
+var DISTRIBUTION_STAKE  = +config.DISTRIBUTION_STAKE;
+var REWARD_THRESHOLD    = +config.REWARD_THRESHOLD;
 
 module.exports = {
   evaluate                  : evaluate,
@@ -37,7 +37,7 @@ module.exports = {
 function evaluate(uid, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime) {
 
   // In the current slant protocol, only up-votes are counted for
-  if (parseInt(value) !== 0) {
+  if (+value !== 0) {
 
     var iMap = Immutable.Map({
       newRep: newRep,
@@ -73,7 +73,7 @@ function getVoteRep(evaluators, value) {
   var toAdd = 0;
   return _.reduce(evaluators, function(memo, evaluator) {
     toAdd = evaluator.value === value ? evaluator.reputation : 0;
-    return math.add(memo,toAdd).toNumber();
+    return +math.add(memo,toAdd);
   }, 0);
 }
 
@@ -81,49 +81,48 @@ function getTotalVotedRep(evaluators) {
   var toAdd = 0;
   return _.reduce(evaluators, function(memo, evaluator) {
     toAdd = evaluator.reputation;
-    return math.add(memo,toAdd).toNumber();
+    return +math.add(memo,toAdd);
   }, 0);
 }
 
 function burnStakeForCurrentUser(currentUserRep, fee) {
-  var toMultiply = math.sub(1, math.mul(STAKE, fee)).toNumber();
-  return math.mul(currentUserRep, toMultiply).toNumber();
+  var toMultiply = +math.sub(1, math.mul(STAKE, fee));
+  return +math.mul(currentUserRep, toMultiply);
 }
 
 function stakeFee(voteRep, cachedRep, bidDuration, tSinceStartOfBid) {
-  var repFactor = math.sub(1, math.pow(math.div(voteRep, cachedRep), GAMMA));
-  var timeFactor = math.sub(1, math.div(tSinceStartOfBid, bidDuration));
-  return math.mul(repFactor, timeFactor).toNumber();
+  var repFactor = +math.sub(1, math.pow(math.div(voteRep, cachedRep), GAMMA));
+  var timeFactor = +math.sub(1, math.div(tSinceStartOfBid, bidDuration));
+  return +math.mul(repFactor, timeFactor);
 }
 
 function getSameEvaluatorsAddValue(newRep, factor, evaluatorRep, voteRep) {
-  return new math(newRep)
+  return +math(newRep)
                 .mul(DISTRIBUTION_STAKE)
                 .mul(factor)
                 .mul(evaluatorRep)
-                .div(voteRep)
-                .toNumber();
+                .div(voteRep);
 }
 
 function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, currentEvaluationValue, currentUserId, bidCreationTime) {
   var toAdd;
-  var factor = math.pow(math.div(voteRep, cachedRep).toNumber(), ALPHA).toNumber();
+  var factor = +math.pow(math.div(voteRep, cachedRep), ALPHA);
   return _.map(evaluators, function(evaluator) {
 
     if ( evaluator.id === currentUserId ) {
-      var tSinceStarted = math.sub(Date.now(), bidCreationTime).toNumber();
+      var tSinceStarted = +math.sub(Date.now(), bidCreationTime);
       util.log.info("tSinceStarted : ", tSinceStarted, " , bidCreationTime : ", bidCreationTime);
       var fee = stakeFee(voteRep, cachedRep, DURATION, tSinceStarted);
       // why? once a user pays himself he can profit only by evaluating - risk free
       //toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
-      //evaluator.reputation = math.add(burnStakeForCurrentUser(newRep, fee), toAdd).toNumber();
+      //evaluator.reputation = +math.add(burnStakeForCurrentUser(newRep, fee), toAdd);
       evaluator.reputation = burnStakeForCurrentUser(newRep, fee);
       //console.log('s e', evaluator);
     }
 
     else if ( evaluator.value === currentEvaluationValue ) {
       toAdd = getSameEvaluatorsAddValue(newRep, factor, evaluator.reputation, voteRep);
-      evaluator.reputation = math.add(evaluator.reputation, toAdd).toNumber();
+      evaluator.reputation = +math.add(evaluator.reputation, toAdd);
       //console.log('s v', evaluator);
     }
 
@@ -133,13 +132,12 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
 
 // In Version 0.0.2 this function was removed
 // function updateEvaluatorsRep(evaluators, currentUserRep, cachedRep) {
-//  var factor = math.pow(math.div(currentUserRep, cachedRep).toNumber(), BETA).toNumber();
-//  var toDivide = new math(1)
-//                        .sub(math.mul(STAKE, factor).toNumber())
-//                        .toNumber();
+//  var factor = +math.pow(math.div(currentUserRep, cachedRep), BETA);
+//  var toDivide = +math(1)
+//                        .sub(math.mul(STAKE, factor));
 
 //  return _.map(evaluators, function(evaluator) {
-//    evaluator.reputation = math.div(evaluator.reputation, toDivide).toNumber();
+//    evaluator.reputation = +math.div(evaluator.reputation, toDivide);
 //    return evaluator;
 //  });
 
@@ -154,12 +152,12 @@ function cleanupEvaluators(evaluators) {
 
 function calcReward(winningContributionScore, cachedRep) {
   //TODO: make this the total and not only the addition
-  var score = math.div(winningContributionScore, cachedRep).toNumber();
+  var score = +math.div(winningContributionScore, cachedRep);
   util.log.info("score : ", score, " , RT : ", REWARD_THRESHOLD);
   if (score < REWARD_THRESHOLD) return false;
   return {
-    reputation: math.mul(REP_REWARD_FACTOR, score).toNumber(),
-    tokens: math.mul(TOKEN_REWARD_FACTOR, score).toNumber()
+    reputation: +math.mul(REP_REWARD_FACTOR, score),
+    tokens: +math.mul(TOKEN_REWARD_FACTOR, score)
   }
 }
 
@@ -168,7 +166,7 @@ function notEnoughTokens(user) {
 }
 
 function payContributionFee(user) {
-  user.tokens = math.sub(user.tokens, CONTRIBUTION_FEE).toNumber();
+  user.tokens = +math.sub(user.tokens, CONTRIBUTION_FEE);
   return user;
 }
 
@@ -194,12 +192,12 @@ function getEvaluationsByVotedValue(evaluations, votedValue) {
 function sumReputation(users) {
   util.log.info("sumReputation users : ", users);
   return _.reduce(users, function(memo, user) {
-    return math.add(memo ,user.reputation).toNumber();
+    return +math.add(memo ,user.reputation);
   }, 0)
 }
 
 function calcScore(repUp, totalRep) {
-  return math.div(repUp, totalRep).toNumber();
+  return +math.div(repUp, totalRep);
 }
 
 function calcUpScore(users, totalRep) {

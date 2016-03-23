@@ -38,7 +38,7 @@ function addToCachedRep(reputation, cb) {
     ReturnValues: 'ALL_NEW'
   };
 
-  //ExpressionAttributeValues: { ':v' : util.math(reputation).abs().toDP(6, 3).toNumber() },
+  //ExpressionAttributeValues: { ':v' : +math(reputation).abs().toDP(6, 3) },
   return db.update(params, cb);
 }
 
@@ -70,17 +70,17 @@ function syncCachedSystemRep(event, cb) {
   _.each(event.Records, function(record) {
     if (record.eventName === 'REMOVE') {
       temp = record.dynamodb.OldImage.reputation;
-      repToAdd = util.math.sub(repToAdd, new util.math(temp.N || temp.S).toNumber()).toNumber();
+      repToAdd = +math.sub(repToAdd, math(temp.N || temp.S));
 
     } else if (record.eventName === 'INSERT') {
       temp = record.dynamodb.NewImage.reputation;
-      repToAdd = util.math.add(repToAdd, new util.math(temp.N || temp.S).toNumber()).toNumber();
+      repToAdd = +math.add(repToAdd, math(temp.N || temp.S));
     } else {
       temp = record.dynamodb.NewImage.reputation;
       temp2 = record.dynamodb.OldImage.reputation;
-      var oldV = new util.math(temp2.N || temp2.S).toNumber();
-      var newV = new util.math(temp.N || temp.S).toNumber();
-      repToAdd = util.math.add(repToAdd, util.math.sub(newV, oldV).toNumber()).toNumber();
+      var oldV = +math(temp2.N || temp2.S);
+      var newV = +math(temp.N || temp.S);
+      repToAdd = +math.add(repToAdd, math.sub(newV, oldV));
     }
   });
   return addToCachedRep(repToAdd, cb);
