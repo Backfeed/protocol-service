@@ -1,3 +1,5 @@
+var config = require('../restApi/lib/config.js');
+
 module.exports = {
 
   user: {
@@ -26,8 +28,8 @@ module.exports = {
     delete: deleteEvaluation
   },
 
-  initialTokens: +process.env.USER_INITIAL_TOKENS,
-  initialReputation: +process.env.USER_INITIAL_REPUTATION,
+  initialTokens: +config.USER_INITIAL_TOKENS,
+  initialReputation: +config.USER_INITIAL_REPUTATION,
   cleanseDB: cleanseDB,
   getCachedRep: getCachedRep,
 
