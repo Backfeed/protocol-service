@@ -3,7 +3,6 @@
 var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
 var _                 = require('underscore');
 var async             = require('async');
-var Immutable         = require('immutable');
 var util              = require('./helper');
 var getCachedRep      = require('./getCachedRep');
 var protocol          = require('./protocol');
@@ -16,12 +15,11 @@ module.exports.execute = function(event, bidCreationTime, cb) {
 
   util.log.info('event', event);
 
-  var iMap = Immutable.Map({
-    voteRep: 0,
-    contributionRep: 0,
-    cachedRep: 0
-  });
+  var contributionId = event.contributionId;
+  var userId = event.userId;
+  var value = event.value;
 
+  var cachedRep;
   var evaluations;
   var evaluators;
   var newEvalId;
@@ -34,24 +32,20 @@ module.exports.execute = function(event, bidCreationTime, cb) {
           getCachedRep(parallelCB);
         },
         evaluations: function(parallelCB) {
-          evaluationsLib.getEvaluationsByContribution(event.contributionId, parallelCB);
+          evaluationsLib.getEvaluationsByContribution(contributionId, parallelCB);
         }
-      },
-        function(err, results) {
-          waterfallCB(err, results);
-        }
-      );
+      }, waterfallCB);
     },
 
     function(results, waterfallCB) {
-      iMap = iMap.set('cachedRep', results.cachedRep.theValue);
+      cachedRep = results.cachedRep.theValue;
       evaluations = results.evaluations;
 
-      var currentUserFormerEvaluation = _.findWhere(evaluations, { userId: event.userId });
+      var currentUserFormerEvaluation = _.findWhere(evaluations, { userId: userId });
 
       if (!!currentUserFormerEvaluation) {
 
-        if (currentUserFormerEvaluation.value === event.value) {
+        if (currentUserFormerEvaluation.value === value) {
           return cb(new Error('400: bad request. current user already evaluated this contribution with this value'));
         }
 
@@ -59,7 +53,7 @@ module.exports.execute = function(event, bidCreationTime, cb) {
 
         util.log.info('current user already evaluated this contribution, removing his vote');
         evaluations = _.reject(evaluations, function(e) {
-          return e.userId === event.userId;
+          return e.userId === userId;
         });
 
       } else {
@@ -72,16 +66,16 @@ module.exports.execute = function(event, bidCreationTime, cb) {
     },
 
     function(evaluators, waterfallCB) {
-      var currentUser = getCurrentUserFrom(evaluators, event.userId);
+      var currentUser = _.findWhere(evaluators, {id:userId});
       var newRep = currentUser.reputation;
-      evaluators = protocol.evaluate(event.userId, newRep, event.value, evaluators, evaluations, iMap.get('cachedRep'), bidCreationTime);
+      evaluators = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime);
       async.parallel({
         updateEvaluatorsRep: function(parallelCB) {
           usersLib.updateEvaluatorsRepToDb(evaluators, parallelCB);
         },
         updateContriubtionMaxScore: function(parallelCB) {
-          if (event.value === 1) {
-            contributionsLib.addToMaxScore(event.contributionId, newRep, parallelCB);
+          if (value === 1) {
+            contributionsLib.addToMaxScore(contributionId, newRep, parallelCB);
           } else {
             parallelCB();
           }
@@ -97,9 +91,3 @@ module.exports.execute = function(event, bidCreationTime, cb) {
   );
 
 };
-
-function getCurrentUserFrom(evaluators, currentUserId) {
-  return _.find(evaluators, function(evaluator) {
-    return evaluator.id === currentUserId;
-  });
-}
