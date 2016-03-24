@@ -39,7 +39,9 @@ module.exports = {
 
   delayedGetCachedRep: delayedGetCachedRep,
 
-  math: math
+  math: math,
+
+  shout: shout
 
 };
 
@@ -97,7 +99,7 @@ function toBody(x) {
 }
 
 function parseProtocol(n) {
-  return math.round(n);
+  return +math.round(n);
 }
 
 function promisedTimeout() {
@@ -113,4 +115,10 @@ function delayedGetCachedRep() {
   return promisedTimeout().then(function() {
     return getCachedRep();
   });
+}
+
+function shout() {
+  console.log('\n\n**************************')
+  console.log.apply(null, arguments);
+  console.log('**************************\n\n')
 }

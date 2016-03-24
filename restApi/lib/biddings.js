@@ -21,7 +21,7 @@ var getCachedRep    = require('./getCachedRep');
 var contributionLib = require('./contributions');
 var evaluationsLib  = require('./evaluations');
 var usersLib        = require('./users');
-var DURATION        = parseFloat(config.DURATION);
+var DURATION        = +config.DURATION;
 
 function createBidding(event, cb) {
 
