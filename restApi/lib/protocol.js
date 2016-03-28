@@ -120,8 +120,11 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
   return _.map(evaluators, function(evaluator) {
 
     if ( evaluator.id === currentUserId ) {
-      var tSinceStarted = +math.sub(Date.now(), bidCreationTime);
-      util.log.info("tSinceStarted : ", tSinceStarted, " , bidCreationTime : ", bidCreationTime);
+      var tSinceStarted;
+      if (bidCreationTime) {
+        tSinceStarted = +math.sub(Date.now(), bidCreationTime);
+        util.log.info("tSinceStarted : ", tSinceStarted, " , bidCreationTime : ", bidCreationTime);
+      }
       var fee = stakeFee(voteRep, cachedRep, DURATION, tSinceStarted);
       // why? once a user pays himself he can profit only by evaluating - risk free
       //toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);

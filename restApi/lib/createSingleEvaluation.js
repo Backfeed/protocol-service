@@ -65,10 +65,12 @@ module.exports.execute = function(event, bidCreationTime, cb) {
 
     },
 
-    function(evaluators, waterfallCB) {
+    function(response, waterfallCB) {
+      evaluators = response;
       var currentUser = _.findWhere(evaluators, {id:userId});
       var newRep = currentUser.reputation;
       evaluators = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime);
+      util.shout('evaluators', evaluators);
       async.parallel({
         updateEvaluatorsRep: function(parallelCB) {
           usersLib.updateEvaluatorsRepToDb(evaluators, parallelCB);
@@ -86,7 +88,10 @@ module.exports.execute = function(event, bidCreationTime, cb) {
 
   ],
     function(err, result) {
-      return cb(err, newEvalId);
+      // todo :: different responses for slant and dmag
+      var contributionScore = protocol.calcUpScore(evaluators, cachedRep);
+      var toResponse = {id: newEvalId, contributionScore: contributionScore}
+      return cb(err, toResponse);
     }
   );
 

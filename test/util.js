@@ -24,6 +24,7 @@ module.exports = {
 
   evaluation: {
     create: createEvaluations,
+    createOne: createEvaluation,
     get: getEvaluation,
     delete: deleteEvaluation
   },
@@ -72,6 +73,7 @@ function getContribution(id) { return chakram.get(URL + '/contributions/' + id, 
 function deleteContribution(id) { return chakram.delete(URL + '/contributions/' + id, {}, params) }
 
 function createEvaluations(body) { return chakram.post(URL + '/evaluations/submit', body, params) }
+function createEvaluation(body) { return chakram.post(URL + '/evaluations/single', body, params) }
 function getEvaluation(id) { return chakram.get(URL + '/evaluations/' + id , params) }
 function deleteEvaluation(id) { return chakram.delete(URL + '/evaluations/' + id, {}, params) }
 
