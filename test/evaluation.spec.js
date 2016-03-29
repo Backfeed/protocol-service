@@ -66,22 +66,23 @@ describe("[EVALUATION]", function() {
 
   //   1- P1  evaluates  C1  by  1  at time  10000
   it("should create an evaluation", () => {
+    var contributionScore; // user and contribution should have same score
+    var userContributionDelta = 0.0000000001; // since JS has some glitches with small floating numbers
     return util.evaluation.createOne({
         userId: p1.id,
         contributionId: contributionId1, 
         value: 1
       })
       .then(res => {
-        util.shout(res.body);
+        contributionScore = res.body.contributionScore;
         expect(validator.isUUID(res.body.id)).to.be.true;
-        expect(res.body.contributionScore).to.be.closeTo(0.196437, delta);
+        expect(contributionScore).to.be.closeTo(0.196437, delta);
+        return util.user.get(p1.id)
+      })
+      .then(res => {
+        p1 = res.body;
+        expect(p1.reputation).to.be.closeTo(contributionScore, userContributionDelta);
         return chakram.wait();
-      //   return util.user.get(p1.id)
-      // })
-      // .then(res => {
-      //   p1 = res.body;
-      //   expect(p1.reputation).to.be.closeTo(0.196437, delta);
-      //   return chakram.wait();
       })
   });
  
