@@ -12,8 +12,8 @@
   "eventSourceArn": "",
   "endpoints": [
     {
-      "path": "evaluations/createsingeevaluati",
-      "method": "GET",
+      "path": "evaluations/single",
+      "method": "POST",
       "authorizationType": "none",
       "apiKeyRequired": true,
       "requestParameters": {},

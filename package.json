@@ -7,6 +7,7 @@
   "private": false,
   "scripts": {
     "test": "mocha test",
+    "evaluation": "mocha test/evaluation.spec.js -w",
     "localtest": "mocha test",
     "sanity": "mocha test/basicApi.spec.js",
     "endBidding": "mocha test/endBidding.spec.js",
@@ -20,7 +21,6 @@
   },
   "dependencies": {
     "serverless-cors-plugin": "0.3.0",
-    "serverless-lambda-prune-plugin": "1.0.3",
     "serverless-optimizer-plugin": "1.0.0",
     "serverless-resources-validation-plugin": "0.2.0",
     "serverless-serve": "1.5.2"
@@ -28,10 +28,11 @@
   "devDependencies": {
     "chai": "3.4.1",
     "chakram": "1.2.1",
-    "mocha": "2.3.4",
-    "serverless-helpers-js": "0.0.3",
     "decimal.js": "5.0.3",
+    "mocha": "2.3.4",
     "promise": "7.1.1",
-    "underscore": "1.8.3"
+    "serverless-helpers-js": "0.0.3",
+    "underscore": "1.8.3",
+    "validator": "5.1.0"
   }
 }

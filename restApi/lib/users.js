@@ -22,8 +22,8 @@ function createUser(event, cb) {
 
   var newUser = {
     "id": util.uuid(),
-    "tokens": event.tokens || parseFloat(config.USER_INITIAL_TOKENS),
-    "reputation": event.reputation || parseFloat(config.USER_INITIAL_REPUTATION),
+    "tokens": event.tokens || +config.USER_INITIAL_TOKENS,
+    "reputation": event.reputation || +config.USER_INITIAL_REPUTATION,
     "referral": event.referral,
     "biddingCount": 0,
     "createdAt": Date.now()

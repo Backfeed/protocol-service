@@ -12,6 +12,7 @@ var async   = require('async');
 var util    = require('./helper');
 var db      = require('./db');
 var config  = require('./config');
+var math    = require('decimal.js');
 
 function updateCachedRep(event, cb) {
 

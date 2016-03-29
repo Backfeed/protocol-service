@@ -17,7 +17,7 @@ module.exports = util;
 
 function sumRep(users) {
   return _.reduce(users, function(memo, user) {
-    return math.add(memo, user.reputation).toNumber();
+    return +math.add(memo, user.reputation);
   }, 0);
 }
 

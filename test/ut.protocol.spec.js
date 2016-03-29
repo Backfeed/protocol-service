@@ -5,15 +5,15 @@ var util              = require('./util');
 var protocol          = require('../restApi/lib/protocol.js');
 var config            = require('../restApi/lib/config.js');
 
-var STAKE               = parseFloat(config.STAKE);
-var ALPHA               = parseFloat(config.ALPHA);
-//var BETA                = parseFloat(config.BETA);
-var GAMMA               = parseFloat(config.GAMMA);
-var TOKEN_REWARD_FACTOR = parseFloat(config.TOKEN_REWARD_FACTOR);
-var REP_REWARD_FACTOR   = parseFloat(config.REP_REWARD_FACTOR);
-var CONTRIBUTION_FEE    = parseFloat(config.CONTRIBUTION_FEE);
-var DURATION            = parseFloat(config.DURATION);
-var DISTRIBUTION_STAKE  = parseFloat(config.DISTRIBUTION_STAKE);
+var STAKE               = +config.STAKE;
+var ALPHA               = +config.ALPHA;
+//var BETA                = +config.BETA;
+var GAMMA               = +config.GAMMA;
+var TOKEN_REWARD_FACTOR = +config.TOKEN_REWARD_FACTOR;
+var REP_REWARD_FACTOR   = +config.REP_REWARD_FACTOR;
+var CONTRIBUTION_FEE    = +config.CONTRIBUTION_FEE;
+var DURATION            = +config.DURATION;
+var DISTRIBUTION_STAKE  = +config.DISTRIBUTION_STAKE;
 
 describe("Unit Test Protocol", function() {
 
