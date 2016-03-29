@@ -98,7 +98,6 @@ function stakeFee(voteRep, cachedRep, bidDuration, tSinceStartOfBid) {
   var repFactor = +math.sub(1, math.pow(math.div(voteRep, cachedRep), GAMMA));
   var timeFactor
   if (bidDuration !== undefined &&  tSinceStartOfBid !== undefined) {
-    timeFactor = math.sub(1, math.div(tSinceStartOfBid, bidDuration));
     timeFactor = +math.sub(1, math.div(tSinceStartOfBid, bidDuration));
   } else {
     timeFactor = 1;
