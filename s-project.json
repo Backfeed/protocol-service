@@ -31,19 +31,23 @@
         "Type": "String",
         "AllowedValues": [
           "dev",
+          "adam3",
+          "jelle",
           "dmag",
           "slant"
         ],
-        "Default": "slant"
+        "Default": "dev"
       },
       "DataModelStage": {
         "Type": "String",
         "AllowedValues": [
           "dev",
+          "adam3",
+          "jelle",
           "dmag",
           "slant"
         ],
-        "Default": "slant"
+        "Default": "dev"
       },
       "NotificationEmail": {
         "Type": "String",
@@ -225,7 +229,6 @@
       },
       "UsersDynamoDB": {
         "Type": "AWS::DynamoDB::Table",
-        "DeletionPolicy": "Retain",
         "Properties": {
           "AttributeDefinitions": [
             {
@@ -265,7 +268,6 @@
       },
       "EvaluationsDynamoDB": {
         "Type": "AWS::DynamoDB::Table",
-        "DeletionPolicy": "Retain",
         "Properties": {
           "AttributeDefinitions": [
             {
@@ -455,7 +457,6 @@
       },
       "ContributionsDynamoDB": {
         "Type": "AWS::DynamoDB::Table",
-        "DeletionPolicy": "Retain",
         "Properties": {
           "AttributeDefinitions": [
             {
@@ -557,7 +558,6 @@
       },
       "BiddingsDynamoDB": {
         "Type": "AWS::DynamoDB::Table",
-        "DeletionPolicy": "Retain",
         "Properties": {
           "AttributeDefinitions": [
             {
@@ -597,7 +597,6 @@
       },
       "CachingDynamoDB": {
         "Type": "AWS::DynamoDB::Table",
-        "DeletionPolicy": "Retain",
         "Properties": {
           "AttributeDefinitions": [
             {
