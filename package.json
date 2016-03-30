@@ -7,12 +7,13 @@
   "private": false,
   "scripts": {
     "test": "mocha test",
-    "evaluation": "mocha test/evaluation.spec.js -w",
+    "evaluation": "mocha test/evaluation.spec.js",
+    "contribution": "mocha test/contribution.spec.js",
     "localtest": "mocha test",
     "sanity": "mocha test/basicApi.spec.js",
     "endBidding": "mocha test/endBidding.spec.js",
-    "protocol": "mocha test/ut.protocol.spec.js -w",
-    "elad": "mocha test/protocol.spec.js -w",
+    "protocol": "mocha test/ut.protocol.spec.js",
+    "elad": "mocha test/protocol.spec.js",
     "start": "npm run localtest"
   },
   "repository": {

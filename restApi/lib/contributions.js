@@ -3,6 +3,7 @@
 module.exports = {
   createContribution          : createContribution,
   getContribution             : getContribution,
+  getContributionWithStats    : getContributionWithStats,
   getContributionEvaluations  : getContributionEvaluations,
   getContributionUsers        : getContributionUsers,
   deleteContribution          : deleteContribution,
@@ -10,15 +11,16 @@ module.exports = {
   addToMaxScore               : addToMaxScore
 };
 
-var async           = require('async');
-var util            = require('./helper');
-var db              = require('./db');
-var config          = require('./config');
-var biddingLib      = require('./biddings');
-var usersLib        = require('./users');
-var protocol        = require('./protocol');
-var evaluationsLib  = require('./evaluations');
-var getCachedRep    = require('./getCachedRep');
+var async          = require('async');
+var _              = require('underscore');
+var util           = require('./helper');
+var db             = require('./db');
+var config         = require('./config');
+var biddingLib     = require('./biddings');
+var usersLib       = require('./users');
+var protocol       = require('./protocol');
+var evaluationsLib = require('./evaluations');
+var getCachedRep   = require('./getCachedRep');
 
 function createContribution(event, cb) {
 
@@ -68,6 +70,42 @@ function getContribution(event, cb) {
   };
 
   return db.get(params, cb);
+}
+
+function getContributionWithStats(event, cb) {
+  var id = event.id;
+  var contribution;
+  var evaluations;
+  var evaluators;
+  var totalSystemRep;
+
+  async.parallel({
+    contribution: function(parallelCB) {
+      getContribution(event, parallelCB);
+    },
+    evaluations: function(parallelCB) {
+      evaluationsLib.getEvaluationsByContribution(id, parallelCB);
+    },
+    cachedRep: function(parallelCB) {
+      getCachedRep(parallelCB)
+    }
+  }, function(err, response) {
+    if (err) return cb(err);
+    contribution = response.contribution;
+    evaluations = response.evaluations;
+    totalSystemRep = response.cachedRep.theValue;
+    async.waterfall([
+      function(waterfallCB) {
+        usersLib.getEvaluators(evaluations, waterfallCB);
+      }
+    ], function(err, response) {
+      if (err) return cb(err);
+      evaluators = response;
+      var protoStats = protocol.getStats(evaluations, evaluators, totalSystemRep)
+      var toResponse = _.extend(contribution, protoStats);
+      cb(null, toResponse);
+    });
+  });
 }
 
 function getContributionScore(event, cb) {
