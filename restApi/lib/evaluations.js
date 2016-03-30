@@ -3,6 +3,7 @@
 module.exports = {
   createEvaluation              : createEvaluation,
   getEvaluation                 : getEvaluation,
+  getEvaluations                : getEvaluations,
   deleteEvaluation              : deleteEvaluation,
   getByValue                    : getByValue,
   getByContributionIdAndValue   : getByContributionIdAndValue,
@@ -17,6 +18,22 @@ var createSingleEvaluation  = require('./createSingleEvaluation');
 var biddingLib              = require('./biddings');
 
 function createEvaluation(event, cb) {
+  // batch creates a set of evaluations
+  // expects an 'event' of the following form:
+  //     "evaluations": [
+  //       {
+  //         "contributionId": "1ffabd01-7a6d-4cd0-b6c6-f2480a583c06",
+  //         "value": 1
+  //       },
+  //       {
+  //         "contributionId": "1f18938f-6eb3-4908-91e0-cf0ca5b2afd1",
+  //         "value": 1
+  //       }
+  //     ],
+  //     "userId": "a384ba35-841b-4510-a53a-c63b377055c6",
+  //     "biddingId": "183d1187-e1b6-4f7e-bf61-f42555127032"
+  //   }
+  //
 
   var params = {
     TableName : config.tables.evaluations,
@@ -50,6 +67,7 @@ function createEvaluation(event, cb) {
             ],
             function (err, newEvalId) {
               if (err) {
+          // why?
                 responseArr.push(err);
               } else {
                 newEvaluation.id = newEvalId;
@@ -81,9 +99,21 @@ function getEvaluation(event, cb) {
     TableName : config.tables.evaluations,
     Key: { id: event.id }
   };
-
   return db.get(params, cb);
 }
+
+function getEvaluations(event, cb) {
+
+  var contributionId = event.contributionId
+  var params = {
+    TableName : config.tables.evaluations,
+    IndexName: 'evaluations-contributionId-createdAt',
+    KeyConditionExpression: 'contributionId = :hkey',
+    ExpressionAttributeValues: { ':hkey': contributionId }
+  };
+  return db.scan(params, cb);
+}
+
 
 function deleteEvaluation(event, cb) {
 
@@ -128,6 +158,8 @@ function getByContributionIdAndValue(contributionId, votedValue, cb) {
 
 
 function getEvaluationsByContribution(contributionId, cb) {
+  // TODO: replace this with getEvaluations({'contributionId': contributionId}, cb)
+  // when that function is written.
   var params = {
     TableName : config.tables.evaluations,
     IndexName: 'evaluations-contributionId-createdAt',

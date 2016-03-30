@@ -21,13 +21,15 @@ module.exports = {
     get: getContribution,
     getWithProtoStats: getContributionWithProtoStats,
     delete: deleteContribution
+    getContributions: getContributions
   },
 
   evaluation: {
     create: createEvaluations,
     createOne: createEvaluation,
     get: getEvaluation,
-    delete: deleteEvaluation
+    delete: deleteEvaluation,
+    getEvaluations: getEvaluations
   },
 
   initialTokens: +config.USER_INITIAL_TOKENS,
@@ -73,11 +75,22 @@ function createContribution(body) { return chakram.post(URL + '/contributions/',
 function getContribution(id) { return chakram.get(URL + '/contributions/' + id, params) }
 function getContributionWithProtoStats(id) { return chakram.get(URL + '/contributions/getprotostats/' + id, params) }
 function deleteContribution(id) { return chakram.delete(URL + '/contributions/' + id, {}, params) }
+function getContributions() { return chakram.get(URL + '/contributions/', {}, params) }
 
-function createEvaluations(body) { return chakram.post(URL + '/evaluations/submit', body, params) }
-function createEvaluation(body) { return chakram.post(URL + '/evaluations/single', body, params) }
+function createEvaluations(body) {
+  return chakram.post(URL + '/evaluations/submit', body, params)
+}
+function createEvaluation(body) {
+  // create a single evaluation through the api
+  console.log('CREATE EVALUATION:', body)
+  return chakram.post(URL + '/evaluations/single', body, params)
+}
 function getEvaluation(id) { return chakram.get(URL + '/evaluations/' + id , params) }
 function deleteEvaluation(id) { return chakram.delete(URL + '/evaluations/' + id, {}, params) }
+function getEvaluations(qs) { 
+  params.qs = qs;
+  return chakram.get(URL + '/evaluations/', params) 
+}
 
 function getCachedRep() { return chakram.get(URL + '/util/getcachedrep/', {}, params) }
 

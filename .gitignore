@@ -44,3 +44,6 @@ _meta
 .settings
 fabfile.py
 fabfile.pyc
+
+protocol-service.sublime-project
+protocol-service.sublime-workspace

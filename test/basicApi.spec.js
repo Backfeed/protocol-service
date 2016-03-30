@@ -16,6 +16,7 @@ describe("Slant Protocol API", function() {
   //  });
   //});
 
+  // TODO: write these tests
   xit("should return 201 on success", function () {
     return expect(util.user.create()).to.have.status(201);
   });

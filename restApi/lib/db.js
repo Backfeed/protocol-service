@@ -14,7 +14,8 @@ var db = {
   update      : update,
   del         : del,
   batchGet    : batchGet,
-  batchWrite  : batchWrite
+  batchWrite  : batchWrite,
+  getDynamoDoc: getDynamoDoc
 };
 
 module.exports = db;
@@ -45,9 +46,15 @@ function get(params, cb) {
 function query(params, cb) {
   var nStartTime = Date.now();
   return dynamoDoc.query(params, function(err, data) {
-    if (_.isEmpty(data)) return cb(notFoundMsg);
+    if (_.isEmpty(data)){
+      return cb(err, []);
+    } 
     var nEndTime = Date.now();
+    util.log.info('****************************************************')
     util.log.info('DB Query Elapsed time: ' + String(nEndTime - nStartTime) + ' milliseconds');
+    util.log.info(params)
+    util.log.info(data)
+
     return cb(err, data.Items);
   });
 }
@@ -55,7 +62,10 @@ function query(params, cb) {
 function scan(params, cb) {
   var nStartTime = Date.now();
   return dynamoDoc.scan(params, function(err, data) {
-    if (_.isEmpty(data)) return cb(notFoundMsg);
+    // util.shout(data)
+    if (_.isEmpty(data)){
+      return cb(err, []);
+    } 
     var nEndTime = Date.now();
     util.log.info('DB Scan Elapsed time: ' + String(nEndTime - nStartTime) + ' milliseconds');
     return cb(err, data.Items);
