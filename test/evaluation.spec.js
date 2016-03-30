@@ -28,6 +28,7 @@ expect = chakram.expect;
 var delta = 0.05
 
 describe("[EVALUATION]", function() {
+  var evaluation1;
   var biddingId;
   var contributionId1;
   var p1, p2, p3, p4, p5;
@@ -74,8 +75,13 @@ describe("[EVALUATION]", function() {
         value: 1
       })
       .then(res => {
-        contributionScore = res.body.contributionScore;
-        expect(validator.isUUID(res.body.id)).to.be.true;
+        evaluation1 = res.body;
+        contributionScore = evaluation1.contributionScore;
+        expect(validator.isUUID(evaluation1.id)).to.be.true;
+        expect(evaluation1.userId).to.equal(p1.id);
+        expect(evaluation1.contributionId).to.equal(contributionId1);
+        expect(evaluation1.value).to.equal(1);
+        expect(evaluation1.createdAt).to.be.a('number');
         expect(contributionScore).to.be.closeTo(0.196437, delta);
         return util.user.get(p1.id)
       })
@@ -83,7 +89,11 @@ describe("[EVALUATION]", function() {
         p1 = res.body;
         expect(p1.reputation).to.be.closeTo(contributionScore, userContributionDelta);
         return chakram.wait();
-      })
+      });
+  });
+
+  it("should get an evaluation", () => {
+
   });
  
 

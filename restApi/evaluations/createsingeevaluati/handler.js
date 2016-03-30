@@ -11,12 +11,12 @@
 var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
 
 // Require Logic
-var createSingleEvaluation = require('../../lib/createSingleEvaluation');
+var func = require('./');
 
 // Lambda Handler
 module.exports.handler = function(event, context) {
-  // currently used only for dmag, so bidding time is irrelevant, so we pass undefined
-  createSingleEvaluation.execute(event, undefined, function(error, response) {
+
+  func(event, function(error, response) {
     return context.done(error, response);
   });
 
