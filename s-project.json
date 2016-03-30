@@ -32,22 +32,24 @@
         "AllowedValues": [
           "dev",
           "adam3",
-          "jelle",
+          "jelle3",
           "dmag",
+          "dmagdemo",
           "slant"
         ],
-        "Default": "dev"
+        "Default": "dmagdemo"
       },
       "DataModelStage": {
         "Type": "String",
         "AllowedValues": [
           "dev",
           "adam3",
-          "jelle",
+          "jelle3",
           "dmag",
+          "dmagdemo",
           "slant"
         ],
-        "Default": "dev"
+        "Default": "dmagdemo"
       },
       "NotificationEmail": {
         "Type": "String",
