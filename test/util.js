@@ -19,6 +19,7 @@ module.exports = {
   contribution: {
     create: createContribution,
     get: getContribution,
+    getWithProtoStats: getContributionWithProtoStats,
     delete: deleteContribution
   },
 
@@ -70,6 +71,7 @@ function endBidding(id) { return chakram.put(URL + '/biddings/' + id, {}, params
 
 function createContribution(body) { return chakram.post(URL + '/contributions/', body, params) }
 function getContribution(id) { return chakram.get(URL + '/contributions/' + id, params) }
+function getContributionWithProtoStats(id) { return chakram.get(URL + '/contributions/getprotostats/' + id, params) }
 function deleteContribution(id) { return chakram.delete(URL + '/contributions/' + id, {}, params) }
 
 function createEvaluations(body) { return chakram.post(URL + '/evaluations/submit', body, params) }

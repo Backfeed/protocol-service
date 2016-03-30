@@ -30,7 +30,8 @@ module.exports = {
   getEvaluationsByVotedValue: getEvaluationsByVotedValue,
   sumReputation             : sumReputation,
   calcScore                 : calcScore,
-  calcUpScore               : calcUpScore
+  calcUpScore               : calcUpScore,
+  getStats                  : getStats
   //updateEvaluatorsRep       : updateEvaluatorsRep
 };
 
@@ -215,4 +216,29 @@ function calcScore(repUp, totalRep) {
 function calcUpScore(users, totalRep) {
   var repUp = sumReputation(users);
   return calcScore(repUp, totalRep);
+}
+
+function getStats(evaluations, evaluators, totalSystemRep) {
+  var evaluator;
+  var score = 0;
+  var totalVotedRep = 0;
+  var toReturn;
+
+  _.each(evaluations, function(e) {
+    evaluator = _.find(evaluators, {id: e.userId});
+    totalVotedRep += evaluator.reputation;
+    if (e.value === 1) { score += evaluator.reputation; };
+  });
+
+  toReturn = {
+    score: score,
+    totalVotedRep: totalVotedRep
+  }
+
+  if (totalSystemRep) {
+    toReturn.scorePercentage = +math.div(score, totalSystemRep);
+    toReturn.totalVotedRepPercentage = +math.div(totalVotedRep, totalSystemRep);
+  }
+
+  return toReturn;
 }
