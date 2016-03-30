@@ -70,17 +70,18 @@ module.exports.execute = function(event, bidCreationTime, cb) {
       var currentUser = _.findWhere(evaluators, {id:userId});
       var newRep = currentUser.reputation;
       evaluators = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime);
-      util.shout('evaluators', evaluators);
       async.parallel({
         updateEvaluatorsRep: function(parallelCB) {
           usersLib.updateEvaluatorsRepToDb(evaluators, parallelCB);
         },
         updateContriubtionMaxScore: function(parallelCB) {
-          if (value === 1) {
-            contributionsLib.addToMaxScore(contributionId, newRep, parallelCB);
-          } else {
-            parallelCB();
-          }
+          return parallelCB();
+          // TODO :: implement with check if score got up, and award contributor if passed threshold
+          // if (value === 1) {
+          //   contributionsLib.addToMaxScore(contributionId, newRep, parallelCB);
+          // } else {
+          //   parallelCB();
+          // }
         }
       }, waterfallCB)
 
