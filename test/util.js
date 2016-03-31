@@ -20,7 +20,7 @@ module.exports = {
     create: createContribution,
     get: getContribution,
     getWithProtoStats: getContributionWithProtoStats,
-    delete: deleteContribution
+    delete: deleteContribution,
     getContributions: getContributions
   },
 
