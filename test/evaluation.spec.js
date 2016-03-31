@@ -66,7 +66,7 @@ describe("[EVALUATION]", function() {
   });
 
   //   1- P1  evaluates  C1  by  1  at time  10000
-  it("should create an evaluation", () => {
+  xit("should create an evaluation", () => {
     var contributionScore; // user and contribution should have same score
     var userContributionDelta = 0.0000000001; // since JS has some glitches with small floating numbers
     return util.evaluation.createOne({
@@ -92,7 +92,7 @@ describe("[EVALUATION]", function() {
       });
   });
 
-  it("should get an evaluation", () => {
+  xit("should get an evaluation", () => {
 
   });
  

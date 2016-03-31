@@ -82,7 +82,6 @@ function createEvaluations(body) {
 }
 function createEvaluation(body) {
   // create a single evaluation through the api
-  console.log('CREATE EVALUATION:', body)
   return chakram.post(URL + '/evaluations/single', body, params)
 }
 function getEvaluation(id) { return chakram.get(URL + '/evaluations/' + id , params) }

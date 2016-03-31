@@ -80,7 +80,7 @@ describe("[CONTRIBUTION]", function() {
       });
     });
 
-    it('should get contribution with protocol properties', () => {
+    xit('should get contribution with protocol properties', () => {
       return util.contribution.getWithProtoStats(contribution1.id)
         .then(res => {
           contribution1 = res.body;

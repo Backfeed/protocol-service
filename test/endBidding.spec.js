@@ -65,7 +65,7 @@ describe('end bidding', function() {
       });
   });
 
-  it('should get bidding with score', function() {
+  xit('should get bidding with score', function() {
     return util.bidding.get(biddingId)
       .then(function(res) {
         var bidding = res.body;
@@ -80,7 +80,7 @@ describe('end bidding', function() {
       });
   });
 
-  it('should declare contribution1 as winner and reward p1', function() {
+  xit('should declare contribution1 as winner and reward p1', function() {
     return util.bidding.end(biddingId)
       .then(function(res) {
         var bidding = res.body;
@@ -101,7 +101,7 @@ describe('end bidding', function() {
       });
   });
 
-  it('should reject ending a Completed bidding', function() {
+  xit('should reject ending a Completed bidding', function() {
     return util.bidding.end(biddingId)
       .then(function(res) {
         expect(res).to.have.status(400);
@@ -111,7 +111,7 @@ describe('end bidding', function() {
       });
   });
 
-  it('should reject submitting a contribution to a Completed bidding', function() {
+  xit('should reject submitting a contribution to a Completed bidding', function() {
     return util.contribution.create({ biddingId: biddingId, userId: p1.id })
       .then(function(res) {
         expect(res).to.have.status(400);
