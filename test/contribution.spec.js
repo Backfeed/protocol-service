@@ -4,6 +4,7 @@ var chakram           = require('chakram');
 var validator         = require('validator');
 var util              = require('./util.js');
 var config            = require('../restApi/lib/config.js');
+var contributions     = require('../restApi/lib/contributions.js')
 
 expect = chakram.expect;
 var delta = 0.0005
@@ -14,7 +15,6 @@ describe("[CONTRIBUTION]", function() {
   var p1, p2, p3, p4, p5;
   var cachedRep;
   var arr = [];
-
 
   before('reset db, create 5 users, bidding, contribution', () => {
     console.log('BEFORE')
@@ -40,7 +40,7 @@ describe("[CONTRIBUTION]", function() {
       });
   });
 
-  it("sould create a contribution", () => {
+  it("should create a contribution", () => {
     return util.contribution.create({ userId: p1.id , biddingId: biddingId })
         .then(res => {
           contribution1 = res.body;
@@ -50,6 +50,23 @@ describe("[CONTRIBUTION]", function() {
           expect(contribution1.createdAt).to.be.a('number');
           expect(contribution1.maxScore).to.equal(0);
         });
+  });
+
+  it("getContributions should return a list of contributions", () => {
+    return util.contribution.getContributions({})
+      .then(res => {
+        expect(res).to.have.status(200)
+        expect(res.body).to.be.an('array')
+        // we created one contribution before, which should show up here 
+        expect(res.body).to.have.length(1)
+        var contribution = res.body[0]
+        expect(contribution).to.have.property('id')
+        // expect(contribution).to.have.property('scorePercentage')
+        // expect(contribution).to.have.property('totalVotedRep')
+        // expect(contribution.scorePercentage).to.equal('xx')
+        // expect(contribution.totalVotedRep).to.equal('xx')
+        }
+      )
   });
 
   describe("GET", () => {
@@ -80,5 +97,4 @@ describe("[CONTRIBUTION]", function() {
         });
     });
   });
-
 });

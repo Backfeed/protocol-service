@@ -4,6 +4,7 @@ module.exports = {
   createContribution          : createContribution,
   getContribution             : getContribution,
   getContributionWithStats    : getContributionWithStats,
+  getContributions            : getContributions,
   getContributionEvaluations  : getContributionEvaluations,
   getContributionUsers        : getContributionUsers,
   deleteContribution          : deleteContribution,
@@ -71,6 +72,29 @@ function getContribution(event, cb) {
 
   return db.get(params, cb);
 }
+
+function getContributions(event, cb) {
+  // return getContribution(event,cb)
+  // return 'xxx'
+  var params = {
+    TableName : config.tables.contributions,
+  };
+  return db.scan(params, cb)
+  // var addAttributesToItems = function(error, data) {
+  //   util.shout('-------------', data)
+  //   elements = data.Items
+  //   _.each(elements, function(element){
+  //     util.shout(element);
+  //     element.scorePercentage = 'x'; 
+  //     element.something = 'x'; 
+  //   });
+  //   return cb(err, data)
+
+  // }
+  // return db.scan(params, addAttributesToItems)
+}
+
+
 
 function getContributionWithStats(event, cb) {
   var id = event.id;
