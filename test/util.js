@@ -43,7 +43,9 @@ module.exports = {
 
   math: math,
 
-  shout: shout
+  shout: shout,
+  clone: clone,
+  sumReputation: sumReputation
 
 };
 
@@ -125,4 +127,14 @@ function shout() {
   console.log('\n\n**************************')
   console.log.apply(null, arguments);
   console.log('**************************\n\n')
+}
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function sumReputation(users) {
+  return _.reduce(users, (memo, user) => {
+    return +math.add(memo ,user.reputation);
+  }, 0)
 }
