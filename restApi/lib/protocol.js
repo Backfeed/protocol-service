@@ -1,8 +1,7 @@
-var Immutable = require('immutable');
 var _         = require('underscore');
 var math      = require('decimal.js');
 var util      = require('./helper');
-var config    = require('./config')
+var config    = require('./config');
 
 var STAKE               = +config.STAKE;
 var ALPHA               = +config.ALPHA;
@@ -35,28 +34,34 @@ module.exports = {
   //updateEvaluatorsRep       : updateEvaluatorsRep
 };
 
-function evaluate(uid, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime) {
+function evaluate(uid, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime, scoreAtPrevReward, contributorId) {
 
-  // In the current slant protocol, only up-votes are counted for
-  if (+value !== 0) {
+  // todo: handle slant differnetly
 
-    var iMap = Immutable.Map({
-      newRep: newRep,
-      voteRep: 0,
-      totalVoteRep: 0,
-      cachedRep: cachedRep
-    });
+  var toReturn = {};
 
-    evaluators = addVoteValueToEvaluators(evaluators, evaluations);
-    iMap = iMap.set('voteRep', getVoteRep(evaluators, value));
-    //iMap = iMap.set('totalVoteRep', getTotalVotedRep(evaluators));
+  evaluators = addVoteValueToEvaluators(evaluators, evaluations);
 
-    evaluators = updateSameEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'), iMap.get('voteRep'), value, uid, bidCreationTime);
-    // evaluators = updateEvaluatorsRep(evaluators, iMap.get('newRep'), iMap.get('cachedRep'));
+  var stats = getStats(evaluations, evaluators, cachedRep);
+  var engagedRep = stats.engagedRep;
+  var voteRep = value === 1 ? stats.score : stats.downScore;
 
-    evaluators = cleanupEvaluators(evaluators);
+  evaluators = updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, engagedRep, value, uid, bidCreationTime);
+  // evaluators = updateEvaluatorsRep(evaluators, newRep, cachedRep);
+  
+  var statsAfter = getStats(evaluations, evaluators, cachedRep);
+  evaluators = cleanupEvaluators(evaluators);
+
+  var prize = calcReward(statsAfter.score, cachedRep, scoreAtPrevReward);
+  if (prize)
+    evaluators = awardContributor(evaluators, prize, contributorId);
+
+  return {
+    evaluators: evaluators,
+    stats: statsAfter,
+    prize: prize
   }
-  return evaluators;
+
 }
 
 function addVoteValueToEvaluators(evaluators, evaluations) {
@@ -91,12 +96,12 @@ function burnStakeForCurrentUser(currentUserRep, fee) {
   return +math.mul(currentUserRep, toMultiply);
 }
 
-function stakeFee(voteRep, cachedRep, bidDuration, tSinceStartOfBid) {
+function stakeFee(engagedRep, cachedRep, bidDuration, tSinceStartOfBid) {
   // the stakefee calculates the amount of rep you put at stake when you evaluate something
   // the fee depends on the amount of reputation compared to the total value
   // and, optionally, on the time the bid is made
 
-  var repFactor = +math.sub(1, math.pow(math.div(voteRep, cachedRep), GAMMA));
+  var repFactor = +math.sub(1, math.pow(math.div(engagedRep, cachedRep), GAMMA));
   var timeFactor
   if (bidDuration !== undefined &&  tSinceStartOfBid !== undefined) {
     timeFactor = math.sub(1, math.div(tSinceStartOfBid, bidDuration));
@@ -115,7 +120,7 @@ function getSameEvaluatorsAddValue(newRep, factor, evaluatorRep, voteRep) {
                 .div(voteRep);
 }
 
-function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, currentEvaluationValue, currentUserId, bidCreationTime) {
+function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, engagedRep, currentEvaluationValue, currentUserId, bidCreationTime) {
   var toAdd;
   var factor = +math.pow(math.div(voteRep, cachedRep), ALPHA);
   return _.map(evaluators, function(evaluator) {
@@ -126,7 +131,7 @@ function updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, current
         tSinceStarted = +math.sub(Date.now(), bidCreationTime);
         util.log.info("tSinceStarted : ", tSinceStarted, " , bidCreationTime : ", bidCreationTime);
       }
-      var fee = stakeFee(voteRep, cachedRep, DURATION, tSinceStarted);
+      var fee = stakeFee(engagedRep, cachedRep, DURATION, tSinceStarted);
       // why? once a user pays himself he can profit only by evaluating - risk free
       //toAdd = getSameEvaluatorsAddValue(newRep, factor, newRep, voteRep);
       //evaluator.reputation = +math.add(burnStakeForCurrentUser(newRep, fee), toAdd);
@@ -164,14 +169,18 @@ function cleanupEvaluators(evaluators) {
   });
 }
 
-function calcReward(winningContributionScore, cachedRep) {
-  //TODO: make this the total and not only the addition
-  var score = +math.div(winningContributionScore, cachedRep);
-  util.log.info("score : ", score, " , RT : ", REWARD_THRESHOLD);
-  if (score < REWARD_THRESHOLD) return false;
+function calcReward(score, cachedRep, scoreAtPrevReward) {
+  var scorePercentage = +math.div(score, cachedRep);
+  if (scorePercentage < REWARD_THRESHOLD || scorePercentage < scoreAtPrevReward)
+    return false;
+
+  // if already rewarded, return only the delta
+  if (scoreAtPrevReward)
+    scorePercentage -= scoreAtPrevReward;
+
   return {
-    reputation: +math.mul(REP_REWARD_FACTOR, score),
-    tokens: +math.mul(TOKEN_REWARD_FACTOR, score)
+    reputation: +math.mul(REP_REWARD_FACTOR, scorePercentage),
+    tokens: +math.mul(TOKEN_REWARD_FACTOR, scorePercentage)
   }
 }
 
@@ -220,26 +229,30 @@ function calcUpScore(users, totalRep) {
 }
 
 function getStats(evaluations, evaluators, totalSystemRep) {
-  var evaluator;
   var score = 0;
-  var totalVotedRep = 0;
-  var toReturn;
+  var downScore = 0;
+  var engagedRep = 0;
 
   _.each(evaluations, function(e) {
-    evaluator = _.find(evaluators, {id: e.userId});
-    totalVotedRep += evaluator.reputation;
-    if (e.value === 1) { score += evaluator.reputation; };
+    var evaluator = _.find(evaluators, {id: e.userId});
+    engagedRep += evaluator.reputation;
+    if (e.value === 1) { score += evaluator.reputation; }
+    if (e.value === 0) { downScore += evaluator.reputation; }
   });
 
-  toReturn = {
+  return {
     score: score,
-    totalVotedRep: totalVotedRep
-  }
+    scorePercentage: +math.div(score, totalSystemRep),
+    downScore: downScore,
+    downScorePercentage: +math.div(downScore, totalSystemRep),
+    engagedRep: engagedRep,
+    engagedRepPercentage: +math.div(engagedRep, totalSystemRep)
+  };
+}
 
-  if (totalSystemRep) {
-    toReturn.scorePercentage = +math.div(score, totalSystemRep);
-    toReturn.totalVotedRepPercentage = +math.div(totalVotedRep, totalSystemRep);
-  }
-
-  return toReturn;
+function awardContributor(evaluators, prize, contributorId) {
+  var contributor = _.findWhere(evaluators, {id:contributorId});
+  contributor.tokens += prize.tokens;
+  contributor.reputation += prize.reputation;
+  return evaluators;
 }

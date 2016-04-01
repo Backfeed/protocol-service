@@ -10,7 +10,7 @@ var util = {
   sumRep: sumRep,
   math  : math,
   shout : shout,
-  log   : logger.log
+  log   : {info: ()=>{}}
 };
 
 module.exports = util;

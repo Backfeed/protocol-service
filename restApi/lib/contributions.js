@@ -28,7 +28,7 @@ function createContribution(event, cb) {
     "id": util.uuid(),
     "userId": event.userId,
     "biddingId": event.biddingId,
-    "maxScore": 0,
+    "scoreAtPrevReward": 0,
     "createdAt": Date.now()
   };
 
@@ -175,7 +175,7 @@ function addToMaxScore(id, newRep, cb) {
     TableName : config.tables.contributions,
     Key: { id: id },
     UpdateExpression: 'set #score = #score + :v',
-    ExpressionAttributeNames: { '#score' : 'maxScore' },
+    ExpressionAttributeNames: { '#score' : 'scoreAtPrevReward' },
     ExpressionAttributeValues: { ':v' : newRep },
     ReturnValues: 'ALL_NEW'
   }

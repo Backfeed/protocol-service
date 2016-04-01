@@ -23,6 +23,7 @@ module.exports.execute = function(event, bidCreationTime, cb) {
   var evaluations;
   var evaluators;
   var newEvalId;
+  var contribution;
 
   async.waterfall([
 
@@ -33,6 +34,9 @@ module.exports.execute = function(event, bidCreationTime, cb) {
         },
         evaluations: function(parallelCB) {
           evaluationsLib.getEvaluationsByContribution(contributionId, parallelCB);
+        },
+        contribution: function(parallelCB) {
+          contributionsLib.get({id:contributionId}, parallelCB);
         }
       }, waterfallCB);
     },
@@ -40,6 +44,7 @@ module.exports.execute = function(event, bidCreationTime, cb) {
     function(results, waterfallCB) {
       cachedRep = results.cachedRep.theValue;
       evaluations = results.evaluations;
+      contribution = results.contribution;
 
       var currentUserFormerEvaluation = _.findWhere(evaluations, { userId: userId });
 
@@ -69,7 +74,9 @@ module.exports.execute = function(event, bidCreationTime, cb) {
       evaluators = response;
       var currentUser = _.findWhere(evaluators, {id:userId});
       var newRep = currentUser.reputation;
-      evaluators = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime);
+      var protoResponse = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime, contribution.scoreAtPrevReward, contribution.userId);
+      evaluators = protoResponse.evaluators;
+
       async.parallel({
         updateEvaluatorsRep: function(parallelCB) {
           usersLib.updateEvaluatorsRepToDb(evaluators, parallelCB);
