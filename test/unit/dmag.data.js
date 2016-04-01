@@ -1,4 +1,4 @@
-{
+module.exports = {
   "users": [
     {"id": 1, "reputation": 20, "tokens": 50},
     {"id": 2, "reputation": 20, "tokens": 50},

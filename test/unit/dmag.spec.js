@@ -19,128 +19,163 @@ var DISTRIBUTION_STAKE  = +config.DISTRIBUTION_STAKE;
 describe("Unit Test DMAG Protocol", () => {
 
   var allowedDeviation = 0.00005;
-  var data = util.clone(require('./dmag.data.json'));
+  var data = util.clone(require('./dmag.data.js'));
+  var results;
   var users = data.users;
   var contributions = data.contributions;
   var bidCreationTime = undefined; // not relevant for dmag, only slant
   var evaluations = { c1: [], c2: [] };
   var cachedRep;
-  var res; // keep this global for afterEach hook
 
   beforeEach('calc total rep in system', ()=> {
+    results = util.clone(require('./../dmag.results.js'));
     cachedRep = util.sumReputation(users);
-    // util.shout('cachedRep', cachedRep);
   });
-
-  afterEach('update users rep from lest response', ()=> {
-    users = updateUsers(res);
-    // util.shout(users);
-  });
-
 
   it("should evaluate step 1", () => {
     var contribution = _.findWhere(contributions, {id: 'c1'});
     var user = users[0];
+    var value = 1;
+    var expected = results["1"];
+
     var uid = user.id;
     var newRep = user.reputation;
-    var value = 1;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = mapEvaluationsToUsers(evaluations[contribution.id]);
-    res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));
+    
+    var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
     expect(res).to.be.an('object');
-    expect(resToRep(res, 0)).to.be.closeTo(19.7788854382, allowedDeviation);
+    updateUsers(res.evaluators);
+
+    _.each(users, u => {
+      var r = _.findWhere(expected.users, {id: u.id});
+      expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+    });
   });
 
   it("should evaluate step 2", () => {
     var contribution = _.findWhere(contributions, {id: 'c1'});
     var user = users[1];
+    var value = 0;
+    var expected = results["2"];
+
     var uid = user.id;
     var newRep = user.reputation;
-    var value = 0;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = mapEvaluationsToUsers(evaluations[contribution.id]);(util.clone(user));
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));(util.clone(user));
 
-    res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
+    var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
     expect(res).to.be.an('object');
-    expect(resToRep(res, 0)).to.be.closeTo(19.7788854382, allowedDeviation);
-    expect(resToRep(res, 1)).to.be.closeTo(19.8525613977, allowedDeviation);
+    updateUsers(res.evaluators);
+
+    _.each(users, u => {
+      var r = _.findWhere(expected.users, {id: u.id});
+      expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+    });
   });
 
   it("should evaluate step 3", () => {
     var contribution = _.findWhere(contributions, {id: 'c1'});
     var user = users[2];
+    var value = 1;
+    var expected = results["3"];
+
     var uid = user.id;
     var newRep = user.reputation;
-    var value = 1;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = mapEvaluationsToUsers(evaluations[contribution.id]);(util.clone(user));
-
-    res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));(util.clone(user));
+    var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
     expect(res).to.be.an('object');
-    expect(resToRep(res, 0)).to.be.closeTo(20.1972438528, allowedDeviation);
-    expect(resToRep(res, 1)).to.be.closeTo(19.8525613977, allowedDeviation);
-    expect(resToRep(res, 2)).to.be.closeTo(19.9094563837, allowedDeviation);
+    updateUsers(res.evaluators);
+
+    _.each(users, u => {
+      var r = _.findWhere(expected.users, {id: u.id});
+      expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+    });
   });
 
   it("should evaluate step 4", () => {
     var contribution = _.findWhere(contributions, {id: 'c2'});
     var user = users[3];
+    var value = 1;
+    var expected = results["4"];
+
     var uid = user.id;
     var newRep = user.reputation;
-    var value = 1;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = mapEvaluationsToUsers(evaluations[contribution.id]);(util.clone(user));
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));(util.clone(user));
 
-    res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
+    var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
     expect(res).to.be.an('object');
-    expect(resToRep(res, 3)).to.be.closeTo(19.7789218868, allowedDeviation);
+    updateUsers(res.evaluators);
+
+    _.each(users, u => {
+      var r = _.findWhere(expected.users, {id: u.id});
+      expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+    });
   });
 
   it("should evaluate step 5", () => {
     var contribution = _.findWhere(contributions, {id: 'c2'});
     var user = users[4];
+    var value = 0;
+    var expected = results["5"];
+
     var uid = user.id;
     var newRep = user.reputation;
-    var value = 0;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = mapEvaluationsToUsers(evaluations[contribution.id]);(util.clone(user));
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));(util.clone(user));
 
-    res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
+    var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
     expect(res).to.be.an('object');
-    expect(resToRep(res, 3)).to.be.closeTo(19.7789218868, allowedDeviation);
-    expect(resToRep(res, 4)).to.be.closeTo(19.8526130418, allowedDeviation);
+    updateUsers(res.evaluators);
+
+    _.each(users, u => {
+      var r = _.findWhere(expected.users, {id: u.id});
+      expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+    });
   });
 
   it("should evaluate step 6", () => {
     var contribution = _.findWhere(contributions, {id: 'c2'});
     var user = users[0];
+    var value = 1;
+    var expected = results["6"];
+
     var uid = user.id;
     var newRep = user.reputation;
-    var value = 1;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = mapEvaluationsToUsers(evaluations[contribution.id]);(util.clone(user));
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));(util.clone(user));
 
-    res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
+    var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime);
     expect(res).to.be.an('object');
-    expect(resToRep(res, 0)).to.be.closeTo(20.1063878036, allowedDeviation);
-    expect(resToRep(res, 3)).to.be.closeTo(20.2009009717, allowedDeviation);
-    expect(resToRep(res, 4)).to.be.closeTo(19.8526130418, allowedDeviation);
+    updateUsers(res.evaluators);
+
+    _.each(users, u => {
+      var r = _.findWhere(expected.users, {id: u.id});
+      expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+    });
   });
 
   it("should evaluate step 7", () => {
     var contribution = _.findWhere(contributions, {id: 'c1'});
     var user = users[1];
+    var value = 1;
+    var expected = results["7"];
+
     var uid = user.id;
     var newRep = user.reputation;
-    var value = 1;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = mapEvaluationsToUsers(evaluations[contribution.id]);(util.clone(user));
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));(util.clone(user));
 
-    res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime, contribution.scoreAtPrevReward, contribution.userId);
+    var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime, contribution.scoreAtPrevReward, contribution.userId);
     expect(res).to.be.an('object');
-    expect(resToRep(res, 0)).to.be.closeTo(20.4790529214, allowedDeviation);
-    expect(resToRep(res, 1)).to.be.closeTo(22.7586066615, allowedDeviation);
-    expect(resToRep(res, 2)).to.be.closeTo(20.2784714441, allowedDeviation);
+    updateUsers(res.evaluators)
+
+    _.each(users, u => {
+      var r = _.findWhere(expected.users, {id: u.id});
+      expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+    });
   });
 
 
@@ -153,10 +188,11 @@ describe("Unit Test DMAG Protocol", () => {
 
 
   // update users to "db" after each step
-  function updateUsers(res) {
-    _.each(res.evaluators, r => {
+  function updateUsers(evaluators) {
+    _.each(evaluators, r => {
       var user = _.findWhere(users, {id: r.id });
       user.reputation = r.reputation;
+      user.tokens = r.tokens;
     });
     return users;
   }
@@ -168,12 +204,9 @@ describe("Unit Test DMAG Protocol", () => {
     });
   }
 
-  // get user n-1 from response
-  function resToRep(res, n) {
-    return _.findWhere(res.evaluators, {id: users[n].id}).reputation;
-  }
 });
 
+// update evaluation is user evaluated this contribution before
 Array.prototype.addOrUpdate = function(evaluation) {
   var prevEval = _.findWhere(this, {userId:evaluation.userId});
   if (prevEval) {
