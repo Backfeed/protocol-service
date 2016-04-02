@@ -69,7 +69,7 @@ describe("[CONTRIBUTION]", function() {
       });
   });
 
-  xdescribe("GET", () => {
+  describe("GET", () => {
     before("Create an evaluation for contribution 1", () => {
       return util.evaluation.createOne({
         userId: p1.id, 
@@ -88,12 +88,11 @@ describe("[CONTRIBUTION]", function() {
           expect(validator.isUUID(contribution1.userId)).to.be.true;
           expect(validator.isUUID(contribution1.biddingId)).to.be.true;
           expect(contribution1.createdAt).to.be.a('number');
-          // implement after fixing max score at create evaluation function
-          // expect(contribution1.scoreAtPrevReward).to.equal(0);
-          expect(contribution1.score).to.be.closeTo(0.19778885, delta)
-          expect(contribution1.totalVotedRep).to.be.closeTo(0.19778885, delta)
-          expect(contribution1.scorePercentage).to.be.closeTo(0.1982271635, delta);
-          expect(contribution1.totalVotedRepPercentage).to.be.closeTo(0.1982271635, delta);
+          expect(contribution1.scoreAtPrevReward).to.equal(0);
+          expect(contribution1.score).to.be.a('number')
+          expect(contribution1.scorePercentage).to.be.a('number');
+          expect(contribution1.engagedRep).to.be.a('number')
+          expect(contribution1.engagedRepPercentage).to.be.a('number');
         });
     });
   });
