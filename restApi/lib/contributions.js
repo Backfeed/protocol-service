@@ -3,6 +3,7 @@
 module.exports = {
   createContribution          : createContribution,
   getContribution             : getContribution,
+  getContributions            : getContributions,
   getContributionWithStats    : getContributionWithStats,
   getContributionEvaluations  : getContributionEvaluations,
   getContributionUsers        : getContributionUsers,
@@ -75,6 +76,31 @@ function getContribution(event, cb) {
   };
 
   return db.get(params, cb);
+}
+
+function getContributions(event, cb) {
+  var toReturn = [];
+  async.waterfall([
+    function(waterfallCB) {
+      var params = {
+        TableName: config.tables.contributions,
+        ConsistentRead: true,
+        ReturnConsumedCapacity: "TOTAL"
+      };
+      db.scan(params, waterfallCB);
+    },
+    function(contributions, waterfallCB) {
+      async.each(contributions, function(c, eachCB) {
+        getContributionWithStats({id: c.id}, function(err, res) {
+          toReturn.push(res);
+          eachCB();
+        });
+      }, waterfallCB);
+    }
+  ], function(err, res) {
+    cb(null, toReturn);
+  });
+
 }
 
 function getContributionWithStats(event, cb) {

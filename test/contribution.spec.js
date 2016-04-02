@@ -1,3 +1,5 @@
+'use strict';
+
 var ServerlessHelpers = require('serverless-helpers-js').loadEnv();
 var _                 = require('underscore');
 var chakram           = require('chakram');
@@ -5,12 +7,13 @@ var validator         = require('validator');
 var util              = require('./util.js');
 var config            = require('../restApi/lib/config.js');
 
-expect = chakram.expect;
+var expect = chakram.expect;
 var delta = 0.0005
 
 describe("[CONTRIBUTION]", function() {
   var biddingId;
   var contribution1;
+  var contribution2;
   var p1, p2, p3, p4, p5;
   var cachedRep;
   var arr = [];
@@ -94,6 +97,35 @@ describe("[CONTRIBUTION]", function() {
           expect(contribution1.engagedRep).to.be.a('number')
           expect(contribution1.engagedRepPercentage).to.be.a('number');
         });
+    });
+  });
+
+  describe('GET ALL', () => {
+    before('make second contribution', () => {
+      return util.contribution.create({ userId: p2.id , biddingId: biddingId })
+          .then(res => contribution2 = res.body);
+    })
+
+    it('should get both contributions', () => {
+      return util.contribution.getAll().then(res => {
+        let c1 = res.body[0];
+        let c2 = res.body[1];
+        let contribs = [c1, c2];
+
+        for (let i=0; i<contribs; i++) {
+          let c = contribs[i];
+          expect(validator.isUUID(c.id)).to.be.true;
+          expect(validator.isUUID(c.userId)).to.be.true;
+          expect(validator.isUUID(c.biddingId)).to.be.true;
+          expect(c.createdAt).to.be.a('number');
+          expect(c.scoreAtPrevReward).to.equal(0);
+          expect(c.score).to.be.a('number')
+          expect(c.scorePercentage).to.be.a('number');
+          expect(c.engagedRep).to.be.a('number')
+          expect(c.engagedRepPercentage).to.be.a('number');
+        }
+
+      });
     });
   });
 
