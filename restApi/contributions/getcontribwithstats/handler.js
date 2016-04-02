@@ -15,9 +15,6 @@ var lib = require('../../lib/contributions');
 
 // Lambda Handler
 module.exports.handler = function(event, context) {
-  console.log('======================== EVENT ========================')
-  console.log(event);
-  console.log('======================== EVENT ========================')
   lib.getContributionWithStats(event, function(error, response) {
     return context.done(error, response);
   });
