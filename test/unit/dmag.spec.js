@@ -20,31 +20,32 @@ describe("Unit Test DMAG Protocol", () => {
 
   var allowedDeviation = 0.00005;
   var data = util.clone(require('./dmag.data.js'));
-  var results = require('./../dmag.results.js');
+  var results = require('../dmag.results.js');
   var contributions = data.contributions;
   var bidCreationTime = undefined; // not relevant for dmag, only slant
   var evaluations = { c1: [], c2: [] };
 
-  it("should evaluate step 1", () => { step(1, 1, 'c1', 1); });
-  it("should evaluate step 2", () => { step(2, 2, 'c1', 0); });
-  it("should evaluate step 3", () => { step(3, 3, 'c1', 1); });
-  it("should evaluate step 4", () => { step(4, 4, 'c2', 1); });
-  it("should evaluate step 5", () => { step(5, 5, 'c2', 0); });
-  it("should evaluate step 6", () => { step(6, 1, 'c2', 1); });
-  it("should evaluate step 7", () => { step(7, 2, 'c1', 1); });
-  it("should evaluate step 8", () => { step(8, 3, 'c1', 0); });
+  //                                           user, contrib, val, debugMode(optional)
+  //                                           u, c,    v
+  it("should evaluate step 1", () => doStep(1, 1, 'c1', 1) );
+  it("should evaluate step 2", () => doStep(2, 2, 'c1', 0) );
+  it("should evaluate step 3", () => doStep(3, 3, 'c1', 1) );
+  it("should evaluate step 4", () => doStep(4, 4, 'c2', 1) );
+  it("should evaluate step 5", () => doStep(5, 5, 'c2', 0) );
+  it("should evaluate step 6", () => doStep(6, 1, 'c2', 1) );
+  it("should evaluate step 7", () => doStep(7, 2, 'c1', 1) );
+  it("should evaluate step 8", () => doStep(8, 3, 'c1', 0) );
   // fix rewarding mechanism after delta hasbeen crossed!
-  it("should evaluate step 9", () => { step(9, 4, 'c1', 1); });
-  xit("should evaluate step 10", () => { step(10, 5, 'c2', 1); });
+  it("should evaluate step 9", () => doStep(9, 4, 'c1', 1) );
+  xit("should evaluate step 10", () => doStep(10, 5, 'c2', 1) );
 
 
 
-  function step(n, uid, cid, value) {
-    var users = util.clone(results[String(n-1)].users);
+  function doStep(step, uid, cid, value, debug) {
+    var users = util.clone(results[String(step-1)].users);
     var cachedRep = util.sumReputation(users);
     var contribution = _.findWhere(contributions, {id: cid});
     var user = _.findWhere(users, {id: uid});
-    var expected = results[String(n)];
 
     var uid = user.id;
     var newRep = user.reputation;
@@ -59,19 +60,17 @@ describe("Unit Test DMAG Protocol", () => {
     if (res.prize)
       contribution.scoreAtPrevReward = res.stats.scorePercentage;
 
+    var expected = results[String(step)];
     _.each(users, u => {
       var r = _.findWhere(expected.users, {id: u.id});
-      // debugStep(STEPHERE, u, r); // change first argument to step u want to debug
+
+      if (debug)
+        util.debugStep(u, r);
+
       expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
       expect(u.tokens).to.be.closeTo(r.tokens, allowedDeviation);
     });
 
-
-    function debugStep(step, u, r) {
-      if (step === n) {
-        util.shout("uid:", u.id, 'rep:', u.reputation, r.reputation, '\n      ', 'tokens:', u.tokens, r.tokens);
-      }
-    }
 
   }
 

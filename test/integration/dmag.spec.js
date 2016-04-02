@@ -17,21 +17,7 @@ describe("Test protocol according to excel", () => {
   var contributionId2;
   var users;
 
-  before('reset db, create 5 users and a bidding', () => {
-    return util.cleanseDB()
-      .then(res => {
-        var promises = [
-          util.user.createN(5),
-          util.bidding.create()
-        ];
-        return chakram.all(promises);
-      })
-      .then(res => {
-        users = res[0];
-        biddingId = res[1].body.id;
-        return chakram.wait();
-      });
-  });
+  before('reset db, create 5 users and a bidding', beforeInit);
 
   it("should set cachedRep to sum of users reputation", () => {
     // we delay this to let AWS event to be processed
@@ -41,31 +27,18 @@ describe("Test protocol according to excel", () => {
   });
 
   it("should cost tokens for submitting a contribution", function () {
-    var promises = [
+    let step = 0;
+
+    return chakram.all([
       util.contribution.create({ userId: users[1].id , biddingId: biddingId }),
       util.contribution.create({ userId: users[2].id , biddingId: biddingId })
-    ];
-    return chakram.all(promises)
+      ])
       .then(res => {
         contributions = res.map(r=>r.body)
-        util.shout('contributions', contributions);
         contributionId1 = res[0].body.id;
         contributionId2 = res[1].body.id;
       })
-      .then(()=>chakram.all(getUsers(users)))
-      .then(res => {
-        users = res.map(r=>r.body);
-
-        var expected = results["0"];
-
-        for (let i=0; i<users.length; i++) {
-          let u = users[i];
-          let r = expected.users[i];
-          expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
-          expect(u.tokens).to.be.closeTo(r.tokens, allowedDeviation);
-        }
-        return chakram.wait();
-      });
+      .then(()=>assertStep(step))
   });
 
   //                                           user, contrib, val
@@ -84,16 +57,39 @@ describe("Test protocol according to excel", () => {
 
 
 
-  function doStep(step, uN, cN, value) {
+  function doStep(step, uN, cN, value, debug) {
     let user = users[uN-1];
     let uid = user.id;
     let cid = contributions[cN-1].id;
+
     return util.evaluation.createOne({
         userId: uid,
         contributionId: cid, 
         value: value
       })
-      .then(()=>chakram.all(getUsers(users)))
+      .then(()=>assertStep(step, debug))
+  }
+
+
+
+  function beforeInit() {
+    return util.cleanseDB()
+      .then(res => {
+        var promises = [
+          util.user.createN(5),
+          util.bidding.create()
+        ];
+        return chakram.all(promises);
+      })
+      .then(res => {
+        users = res[0];
+        biddingId = res[1].body.id;
+        return chakram.wait();
+      });
+  }
+
+  function assertStep(step, debug) {
+    return chakram.all(getUsers(users))
       .then(res => {
         users = res.map(r=>r.body);
 
@@ -102,23 +98,24 @@ describe("Test protocol according to excel", () => {
         for (let i=0; i<users.length; i++) {
           let u = users[i];
           let r = expected.users[i];
-          // debugStep(stepNumber, u, r); // change first argument to step u want to debug
+
+          if (debug)
+            util.debugStep(u, r);
+
           expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
           expect(u.tokens).to.be.closeTo(r.tokens, allowedDeviation);
         }
         return chakram.wait();
       });
-
-    function debugStep(s, u, r) {
-      if (step === s) {
-        util.shout("uid:", u.id, 'rep:', u.reputation, r.reputation, '\n      ', 'tokens:', u.tokens, r.tokens);
-      }
-    }
   }
 
 });
 
 function getUsers(users) {
   return users.map(u=>u.id)
-              .map(util.user.get)
+              .map(util.user.get);
+}
+
+function debugStep(u, r) {
+  util.shout("uid:", u.id, '\nrep:', u.reputation, r.reputation, '\ntokens:', u.tokens, r.tokens);
 }

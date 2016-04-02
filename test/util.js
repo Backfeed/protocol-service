@@ -45,6 +45,7 @@ module.exports = {
 
   shout: shout,
   clone: clone,
+  debugStep: debugStep,
   sumReputation: sumReputation
 
 };
@@ -137,4 +138,8 @@ function sumReputation(users) {
   return _.reduce(users, (memo, user) => {
     return +math.add(memo ,user.reputation);
   }, 0)
+}
+
+function debugStep(u, r) {
+  shout("uid:", u.id, '\nrep:', u.reputation, r.reputation, '\ntokens:', u.tokens, r.tokens);
 }
