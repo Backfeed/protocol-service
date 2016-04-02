@@ -38,8 +38,6 @@ function evaluate(uid, newRep, value, evaluators, evaluations, cachedRep, bidCre
 
   // todo: handle slant differnetly
 
-  var toReturn = {};
-
   evaluators = addVoteValueToEvaluators(evaluators, evaluations);
 
   var stats = getStats(evaluations, evaluators, cachedRep);
