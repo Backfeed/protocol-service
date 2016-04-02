@@ -84,7 +84,9 @@ module.exports.execute = function(event, bidCreationTime, cb) {
         },
         updateContriubtionPrevReward: function(parallelCB) {
           return parallelCB();
-          // TODO :: implement with check if score got up, and award contributor if passed threshold
+          // waiting for answer about if we should take delta 
+          // from previous rewarded score
+          // or from the percentage score
           // if (protoResponse.prize) {
           //   contributionsLib.updatePrevReward(contributionId, protoResponse.scorePercentage, parallelCB);
           // } else {
