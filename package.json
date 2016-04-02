@@ -15,6 +15,7 @@
     "protocol": "mocha test/ut.protocol.spec.js",
     "elad": "mocha test/protocol.spec.js",
     "dmag": "mocha test/unit/dmag.spec.js -w",
+    "idmag": "mocha test/integration/dmag.spec.js",
     "start": "npm run localtest"
   },
   "repository": {
