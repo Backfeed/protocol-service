@@ -79,37 +79,42 @@ function getContribution(event, cb) {
 
 function getContributionWithStats(event, cb) {
   var id = event.id;
-  var contribution;
   var evaluations;
   var evaluators;
-  var totalSystemRep;
 
   async.parallel({
     contribution: function(parallelCB) {
       getContribution(event, parallelCB);
     },
-    evaluations: function(parallelCB) {
-      evaluationsLib.getEvaluationsByContribution(id, parallelCB);
+    evaluationsAndEvaluators: function(parallelCB) {
+      async.waterfall([
+        function(waterfallCB) {
+          evaluationsLib.getEvaluationsByContribution(id, waterfallCB);
+        },
+        function(response, waterfallCB) {
+          evaluations = response;
+          // If there's no evaluations, skip fetching the evaluators
+          if (evaluations.length) {
+            usersLib.getEvaluators(evaluations, waterfallCB);
+          } else { waterfallCB(); }
+        },
+        function(response, waterfallCB) {
+          // If there's no evaluations, response will be empty, so we set empty array to pass to protocol function
+          evaluators = response || [];
+          parallelCB();
+        }
+      ]);
     },
     cachedRep: function(parallelCB) {
-      getCachedRep(parallelCB)
+      getCachedRep(parallelCB);
     }
   }, function(err, response) {
     if (err) return cb(err);
-    contribution = response.contribution;
-    evaluations = response.evaluations;
-    totalSystemRep = response.cachedRep.theValue;
-    async.waterfall([
-      function(waterfallCB) {
-        usersLib.getEvaluators(evaluations, waterfallCB);
-      }
-    ], function(err, response) {
-      if (err) return cb(err);
-      evaluators = response;
-      var protoStats = protocol.getStats(evaluations, evaluators, totalSystemRep)
-      var toResponse = _.extend(contribution, protoStats);
-      cb(null, toResponse);
-    });
+    var contribution = response.contribution;
+    var totalSystemRep = response.cachedRep.theValue;
+    var protoStats = protocol.getStats(evaluations, evaluators, totalSystemRep)
+    var toResponse = _.extend(contribution, protoStats);
+    cb(null, toResponse);
   });
 }
 

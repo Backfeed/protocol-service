@@ -53,7 +53,23 @@ describe("[CONTRIBUTION]", function() {
         });
   });
 
-  describe("GET", () => {
+  it("should get contribution with score 0 when no evaluations", () => {
+    return util.contribution.getWithProtoStats(contribution1.id)
+      .then(res => {
+        contribution1 = res.body;
+        expect(validator.isUUID(contribution1.id)).to.be.true;
+        expect(validator.isUUID(contribution1.userId)).to.be.true;
+        expect(validator.isUUID(contribution1.biddingId)).to.be.true;
+        expect(contribution1.createdAt).to.be.a('number');
+        expect(contribution1.scoreAtPrevReward).to.equal(0);
+        expect(contribution1.score).to.equal(0)
+        expect(contribution1.scorePercentage).to.equal(0);
+        expect(contribution1.engagedRep).to.equal(0);
+        expect(contribution1.engagedRepPercentage).to.equal(0);
+      });
+  });
+
+  xdescribe("GET", () => {
     before("Create an evaluation for contribution 1", () => {
       return util.evaluation.createOne({
         userId: p1.id, 
