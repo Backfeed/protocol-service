@@ -47,14 +47,14 @@ function evaluate(uid, newRep, value, evaluators, evaluations, cachedRep, bidCre
   var voteRep = value === 1 ? stats.score : stats.downScore;
 
   evaluators = updateSameEvaluatorsRep(evaluators, newRep, cachedRep, voteRep, engagedRep, value, uid, bidCreationTime);
-  // evaluators = updateEvaluatorsRep(evaluators, newRep, cachedRep);
   
+  var prize = calcReward(stats.score, cachedRep, scoreAtPrevReward);
+  if (prize)
+    evaluators = awardContributor(evaluators, prize, contributorId);
+
   var statsAfter = getStats(evaluations, evaluators, cachedRep);
   evaluators = cleanupEvaluators(evaluators);
 
-  var prize = calcReward(statsAfter.score, cachedRep, scoreAtPrevReward);
-  if (prize)
-    evaluators = awardContributor(evaluators, prize, contributorId);
 
   return {
     evaluators: evaluators,

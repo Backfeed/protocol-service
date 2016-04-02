@@ -21,16 +21,9 @@ describe("Unit Test DMAG Protocol", () => {
   var allowedDeviation = 0.00005;
   var data = util.clone(require('./dmag.data.js'));
   var results = require('./../dmag.results.js');
-  var users = data.users;
   var contributions = data.contributions;
   var bidCreationTime = undefined; // not relevant for dmag, only slant
   var evaluations = { c1: [], c2: [] };
-  var cachedRep;
-
-  beforeEach('calc total rep in system', ()=> {
-    
-    cachedRep = util.sumReputation(users);
-  });
 
   it("should evaluate step 1", () => { step(1, 1, 'c1', 1); });
   it("should evaluate step 2", () => { step(2, 2, 'c1', 0); });
@@ -39,9 +32,16 @@ describe("Unit Test DMAG Protocol", () => {
   it("should evaluate step 5", () => { step(5, 5, 'c2', 0); });
   it("should evaluate step 6", () => { step(6, 1, 'c2', 1); });
   it("should evaluate step 7", () => { step(7, 2, 'c1', 1); });
+  it("should evaluate step 8", () => { step(8, 3, 'c1', 0); });
+  // fix rewarding mechanism after delta hasbeen crossed!
+  it("should evaluate step 9", () => { step(9, 4, 'c1', 1); });
+  xit("should evaluate step 10", () => { step(10, 5, 'c2', 1); });
+
 
 
   function step(n, uid, cid, value) {
+    var users = util.clone(results[String(n-1)].users);
+    var cachedRep = util.sumReputation(users);
     var contribution = _.findWhere(contributions, {id: cid});
     var user = _.findWhere(users, {id: uid});
     var expected = results[String(n)];
@@ -49,16 +49,21 @@ describe("Unit Test DMAG Protocol", () => {
     var uid = user.id;
     var newRep = user.reputation;
     evaluations[contribution.id].addOrUpdate({userId: uid, value: value});
-    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id]));(util.clone(user));
+    var evaluators = util.clone(mapEvaluationsToUsers(evaluations[contribution.id], users));
 
     var res = protocol.evaluate(uid, newRep, value, evaluators, evaluations[contribution.id], cachedRep, bidCreationTime, contribution.scoreAtPrevReward, contribution.userId);
     expect(res).to.be.an('object');
-    updateUsers(res.evaluators)
+
+    users = updateUsers(evaluators, users);
+
+    if (res.prize)
+      contribution.scoreAtPrevReward = res.stats.scorePercentage;
 
     _.each(users, u => {
       var r = _.findWhere(expected.users, {id: u.id});
       // debugStep(STEPHERE, u, r); // change first argument to step u want to debug
       expect(u.reputation).to.be.closeTo(r.reputation, allowedDeviation);
+      expect(u.tokens).to.be.closeTo(r.tokens, allowedDeviation);
     });
 
 
@@ -73,7 +78,7 @@ describe("Unit Test DMAG Protocol", () => {
 
 
   // update users to "db" after each step
-  function updateUsers(evaluators) {
+  function updateUsers(evaluators, users) {
     _.each(evaluators, r => {
       var user = _.findWhere(users, {id: r.id });
       user.reputation = r.reputation;
@@ -83,7 +88,7 @@ describe("Unit Test DMAG Protocol", () => {
   }
 
   // get evaluators from "db" with their current reputation
-  function mapEvaluationsToUsers(evaluations) {
+  function mapEvaluationsToUsers(evaluations, users) {
     return _.map(evaluations, e => {
       return _.findWhere(users, {id: e.userId});
     });
