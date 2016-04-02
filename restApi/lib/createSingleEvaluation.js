@@ -76,7 +76,6 @@ module.exports.execute = function(event, bidCreationTime, cb) {
       var newRep = currentUser.reputation;
       var protoResponse = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime, contribution.scoreAtPrevReward, contribution.userId);
       evaluators = protoResponse.evaluators;
-
       async.parallel({
         updateEvaluatorsRep: function(parallelCB) {
           usersLib.updateEvaluatorsRepToDb(evaluators, parallelCB);
@@ -98,7 +97,13 @@ module.exports.execute = function(event, bidCreationTime, cb) {
     function(err, result) {
       // todo :: different responses for slant and dmag
       var contributionScore = protocol.calcUpScore(evaluators, cachedRep);
-      var toResponse = {id: newEvalId, contributionScore: contributionScore}
+      var currentUser = _.findWhere(evaluators, {id: userId});
+      var toResponse = {
+        id: newEvalId, 
+        contributionScore: contributionScore,
+        evaluatorNewTokenBalance: currentUser.tokens,
+        evaluatorNewReputationBalance: currentUser.reputation
+      };
       return cb(err, toResponse);
     }
   );

@@ -16,18 +16,17 @@ function func(event, cb) {
 
   createSingleEvaluation.execute(newEvaluation, undefined, function(err, res) {
     newEvaluation.id = res.id;
+    newEvaluation.contributionScore = res.contributionScore;
+    newEvaluation.evaluatorNewTokenBalance =  res.evaluatorNewTokenBalance;
+    newEvaluation.evaluatorNewReputationBalance = res.evaluatorNewReputationBalance;
 
     var params = {
       TableName : config.tables.evaluations,
       Item: newEvaluation
     };
 
-    var toReturn = JSON.parse(JSON.stringify(newEvaluation))
-    toReturn.contributionScore
-
     db.put(params, function(err) {
       if (err) return cb(err);
-      newEvaluation.contributionScore = res.contributionScore;
       cb(null, newEvaluation);
     });
 
