@@ -16,7 +16,7 @@ describe("[CONTRIBUTION]", function() {
   var arr = [];
 
 
-  before('reset db, create 5 users, bidding, contribution', () => {
+  before('reset db, create 5 users, bidding', () => {
     console.log('BEFORE')
     console.log('Cleansing db ...')
     return util.cleanseDB()
@@ -49,6 +49,7 @@ describe("[CONTRIBUTION]", function() {
           expect(validator.isUUID(contribution1.biddingId)).to.be.true;
           expect(contribution1.createdAt).to.be.a('number');
           expect(contribution1.scoreAtPrevReward).to.equal(0);
+          expect(contribution1.contributorNewTokenBalance).to.equal(config.USER_INITIAL_TOKENS - config.CONTRIBUTION_FEE);
         });
   });
 

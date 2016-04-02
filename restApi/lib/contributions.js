@@ -24,6 +24,8 @@ var getCachedRep   = require('./getCachedRep');
 
 function createContribution(event, cb) {
 
+  var user;
+
   var newContribution = {
     "id": util.uuid(),
     "userId": event.userId,
@@ -45,19 +47,22 @@ function createContribution(event, cb) {
       if (bidding.status === 'Completed') return cb(new Error('400. bad request. bidding is complete, no more contributions please!'));
       usersLib.getUser({ id: event.userId }, waterfallCB);
     },
-    function(user, waterfallCB) {
+    function(response, waterfallCB) {
+      user = response;
       if (protocol.notEnoughTokens(user)) return cb(new Error('400. bad request. not enough tokens for the contribution fee'));
       user = protocol.payContributionFee(user);
       util.log.info("User after contribution fee", user);
       usersLib.updateUser(user, waterfallCB);
     },
-    function() {
-      return db.put(params, cb, newContribution);
+    function(response, waterfallCB) {
+      db.put(params, waterfallCB);
     }
   ], function (err) {
-    if (err) {
+    if (err)
       return cb(err);
-    }
+
+    newContribution.contributorNewTokenBalance = user.tokens;
+    cb(null, newContribution)
   });
 
 }
