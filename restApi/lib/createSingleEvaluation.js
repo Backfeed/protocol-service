@@ -36,7 +36,7 @@ module.exports.execute = function(event, bidCreationTime, cb) {
           evaluationsLib.getEvaluationsByContribution(contributionId, parallelCB);
         },
         contribution: function(parallelCB) {
-          contributionsLib.get({id:contributionId}, parallelCB);
+          contributionsLib.getContribution({id:contributionId}, parallelCB);
         }
       }, waterfallCB);
     },
