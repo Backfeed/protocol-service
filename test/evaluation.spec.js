@@ -77,6 +77,7 @@ describe("[EVALUATION]", function() {
       .then(res => {
         evaluation1 = res.body;
         expect(evaluation1.contributionScore).to.be.a('number')
+        expect(evaluation1.contributionScorePercentage).to.be.a('number')
         expect(validator.isUUID(evaluation1.id)).to.be.true;
         expect(evaluation1.userId).to.equal(p1.id);
         expect(evaluation1.contributionId).to.equal(contributionId1);

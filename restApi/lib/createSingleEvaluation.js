@@ -24,6 +24,8 @@ module.exports.execute = function(event, bidCreationTime, cb) {
   var evaluators;
   var newEvalId;
   var contribution;
+  var contributionNewScore;
+  var protoResponse;
 
   async.waterfall([
 
@@ -74,17 +76,17 @@ module.exports.execute = function(event, bidCreationTime, cb) {
       evaluators = response;
       var currentUser = _.findWhere(evaluators, {id:userId});
       var newRep = currentUser.reputation;
-      var protoResponse = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime, contribution.scoreAtPrevReward, contribution.userId);
+      protoResponse = protocol.evaluate(userId, newRep, value, evaluators, evaluations, cachedRep, bidCreationTime, contribution.scoreAtPrevReward, contribution.userId);
       evaluators = protoResponse.evaluators;
       async.parallel({
         updateEvaluatorsRep: function(parallelCB) {
           usersLib.updateEvaluatorsRepToDb(evaluators, parallelCB);
         },
-        updateContriubtionMaxScore: function(parallelCB) {
+        updateContriubtionPrevReward: function(parallelCB) {
           return parallelCB();
           // TODO :: implement with check if score got up, and award contributor if passed threshold
-          // if (value === 1) {
-          //   contributionsLib.addToMaxScore(contributionId, newRep, parallelCB);
+          // if (protoResponse.prize) {
+          //   contributionsLib.updatePrevReward(contributionId, protoResponse.scorePercentage, parallelCB);
           // } else {
           //   parallelCB();
           // }
@@ -95,12 +97,13 @@ module.exports.execute = function(event, bidCreationTime, cb) {
 
   ],
     function(err, result) {
+      
       // todo :: different responses for slant and dmag
-      var contributionScore = protocol.calcUpScore(evaluators, cachedRep);
       var currentUser = _.findWhere(evaluators, {id: userId});
       var toResponse = {
         id: newEvalId, 
-        contributionScore: contributionScore,
+        contributionScore: protoResponse.stats.score,
+        contributionScorePercentage: protoResponse.stats.scorePercentage,
         evaluatorNewTokenBalance: currentUser.tokens,
         evaluatorNewReputationBalance: currentUser.reputation
       };
