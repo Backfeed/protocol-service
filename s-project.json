@@ -37,7 +37,7 @@
           "dmagdemo",
           "slant"
         ],
-        "Default": "dmagdemo"
+        "Default": "adam3"
       },
       "DataModelStage": {
         "Type": "String",
@@ -49,7 +49,7 @@
           "dmagdemo",
           "slant"
         ],
-        "Default": "dmagdemo"
+        "Default": "adam3"
       },
       "NotificationEmail": {
         "Type": "String",

@@ -101,7 +101,8 @@ function batchGet(params, cb, table) {
     var nEndTime = Date.now();
     util.log.info(err, data);
     util.log.info('DB batchGet Elapsed time: ' + String(nEndTime - nStartTime) + ' milliseconds');
-    return cb(err, data.Responses[table]);
+    var toReturn = data ? data.Responses[table] : [];
+    return cb(err, toReturn);
   });
 }
 

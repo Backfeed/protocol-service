@@ -19,6 +19,7 @@ module.exports = {
   contribution: {
     create: createContribution,
     get: getContribution,
+    getAll: getAllContributions,
     getWithProtoStats: getContributionWithProtoStats,
     delete: deleteContribution,
     getContributions: getContributions
@@ -45,7 +46,10 @@ module.exports = {
 
   math: math,
 
-  shout: shout
+  shout: shout,
+  clone: clone,
+  debugStep: debugStep,
+  sumReputation: sumReputation
 
 };
 
@@ -73,6 +77,7 @@ function endBidding(id) { return chakram.put(URL + '/biddings/' + id, {}, params
 
 function createContribution(body) { return chakram.post(URL + '/contributions/', body, params) }
 function getContribution(id) { return chakram.get(URL + '/contributions/' + id, params) }
+function getAllContributions() { return chakram.get(URL + '/contributions', params) }
 function getContributionWithProtoStats(id) { return chakram.get(URL + '/contributions/getprotostats/' + id, params) }
 function deleteContribution(id) { return chakram.delete(URL + '/contributions/' + id, {}, params) }
 function getContributions() { return chakram.get(URL + '/contributions/', {}, params) }
@@ -137,4 +142,18 @@ function shout() {
   console.log('\n\n**************************')
   console.log.apply(null, arguments);
   console.log('**************************\n\n')
+}
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function sumReputation(users) {
+  return _.reduce(users, (memo, user) => {
+    return +math.add(memo ,user.reputation);
+  }, 0)
+}
+
+function debugStep(u, r) {
+  shout("uid:", u.id, '\nrep:', u.reputation, r.reputation, '\ntokens:', u.tokens, r.tokens);
 }
