@@ -14,5 +14,6 @@ As the AWS interface uses a non-resizable select box, just remember *it is the s
 
 * the table protocol-service-caching should have a totalRepInSystem set to 0
 
- 
+if you run into problems deploying functions temporarily remove the optimizer plugin from project.json
 
+`serverless-optimizer-plugin`
