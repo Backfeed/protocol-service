@@ -1,6 +1,21 @@
-# setup tests
+# deployment
 
-The test may need some manual setup.
+Deploy changes to Amazon by:
+
+* change "Default" to the stage you want to deploy to by editing s-project.json in two places 
+(this is to work around an serverless bug)
+
+go to /restApi/
+* `sls function deploy`
+* `sls endpoint deploy`
+* `sls resource deploy`
+
+
+# running tests
+
+you can run `mocha test` from the root directory
+
+# troubleshouting
 
 If you get errors having to do with the system reputation, check these things:
 
