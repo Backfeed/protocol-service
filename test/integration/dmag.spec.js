@@ -19,7 +19,7 @@ describe("Test protocol according to excel", () => {
 
   before('reset db, create 5 users and a bidding', beforeInit);
 
-  it("should set cachedRep to sum of users reputation", () => {
+  xit("should set cachedRep to sum of users reputation", () => {
     // we delay this to let AWS event to be processed
     return util.delayedGetCachedRep().then(res => {
       expect(res.body.theValue).to.be.closeTo(100, allowedDeviation);
@@ -43,16 +43,16 @@ describe("Test protocol according to excel", () => {
 
   //                                           user, contrib, val
   //                                           u, c, v
-  it("should evaluate step 1", () => doStep(1, 1, 1, 1) );
-  it("should evaluate step 2", () => doStep(2, 2, 1, 0) );
-  it("should evaluate step 3", () => doStep(3, 3, 1, 1) );
-  it("should evaluate step 4", () => doStep(4, 4, 2, 1) );
-  it("should evaluate step 5", () => doStep(5, 5, 2, 0) );
-  it("should evaluate step 6", () => doStep(6, 1, 2, 1) );
-  it("should evaluate step 7", () => doStep(7, 2, 1, 1) );
-  it("should evaluate step 8", () => doStep(8, 3, 1, 0) );
+  xit("should evaluate step 1", () => doStep(1, 1, 1, 1) );
+  xit("should evaluate step 2", () => doStep(2, 2, 1, 0) );
+  xit("should evaluate step 3", () => doStep(3, 3, 1, 1) );
+  xit("should evaluate step 4", () => doStep(4, 4, 2, 1) );
+  xit("should evaluate step 5", () => doStep(5, 5, 2, 0) );
+  xit("should evaluate step 6", () => doStep(6, 1, 2, 1) );
+  xit("should evaluate step 7", () => doStep(7, 2, 1, 1) );
+  xit("should evaluate step 8", () => doStep(8, 3, 1, 0) );
   // fix rewarding mechanism after delta hasbeen crossed!
-  it("should evaluate step 9", () => doStep(9, 4, 1, 1) );
+  xit("should evaluate step 9", () => doStep(9, 4, 1, 1) );
   xit("should evaluate step 10", () => doStep(10, 5, 2, 1) );
 
 

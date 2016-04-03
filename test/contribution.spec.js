@@ -44,7 +44,7 @@ describe("[CONTRIBUTION]", function() {
       });
   });
 
-  it("should create a contribution", () => {
+  xit("should create a contribution", () => {
     return util.contribution.create({ userId: p1.id , biddingId: biddingId })
         .then(res => {
           contribution1 = res.body;
@@ -57,6 +57,15 @@ describe("[CONTRIBUTION]", function() {
         });
   });
 
+  it("getContributions should return a list of contributions", () => {
+    return util.contribution.getContributions({})
+      .then(res => {
+        expect(res).to.have.status(200)
+        expect(res.body).to.be.an('array')
+        expect(res.body).to.have.length(0)
+        }
+      )
+      
   it("should get contribution with score 0 when no evaluations", () => {
     return util.contribution.getWithProtoStats(contribution1.id)
       .then(res => {
@@ -131,3 +140,7 @@ describe("[CONTRIBUTION]", function() {
   });
 
 });
+<<<<<<< HEAD
+=======
+});
+>>>>>>> master

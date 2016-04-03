@@ -82,7 +82,7 @@ describe("Slant Protocol API", function() {
       });
     });
 
-    it("should create song titles - Contributions", function () {
+    xit("should create song titles - Contributions", function () {
       var multipleResponses = [
         util.contribution.create({ 'userId': george.id, 'biddingId': abbey.id }),
         util.contribution.create({ 'userId': paul.id, 'biddingId': white.id }),
