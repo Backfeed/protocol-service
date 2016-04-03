@@ -50,9 +50,13 @@ describe("Unit Test Protocol", function() {
     expect(protocol.evaluate('current', 1, evaluators,evaluations,.1)[0].reputation).to.be.equal(0.10526315789473684);
   });
 
-  xit("should notEnoughTokens", function () {
-    expect(protocol.notEnoughTokens({ tokens: 2 })).to.be.equal(false);
-    expect(protocol.notEnoughTokens({ tokens: 1 })).to.be.equal(false);
+  it("should notEnoughTokens", function () {
+    // notEnought tokens compares the amount of tokens with config.CONTRIBUTION_FEE
+    // at the moment of writing, this value is changing all the time. We just assume it is more than 0.01 and less than 10000
+
+    expect(protocol.notEnoughTokens({ tokens: 200000 })).to.be.equal(false);
+    expect(protocol.notEnoughTokens({ tokens: 100001 })).to.be.equal(false);
+    expect(protocol.notEnoughTokens({ tokens: 0.001 })).to.be.equal(true);
     expect(protocol.notEnoughTokens({ tokens: 0 })).to.be.equal(true);
   });
 
