@@ -1,3 +1,4 @@
+var _                      = require('underscore');
 var createSingleEvaluation = require('../../lib/createSingleEvaluation');
 var config                 = require('../../lib/config');
 var db                     = require('../../lib/db');
@@ -15,19 +16,19 @@ function func(event, cb) {
   };
 
   createSingleEvaluation.execute(newEvaluation, undefined, function(err, res) {
-    newEvaluation.id = res.id;
+    // the ID might be a new one if it's the first evaluation of this 
+    // user on this contribution, or it's the id of the former evaluation if exists
+    newEvaluation.id = res.id
 
     var params = {
       TableName : config.tables.evaluations,
       Item: newEvaluation
     };
 
-    var toReturn = JSON.parse(JSON.stringify(newEvaluation))
-    toReturn.contributionScore
-
     db.put(params, function(err) {
       if (err) return cb(err);
-      newEvaluation.contributionScore = res.contributionScore;
+      
+      newEvaluation = _.extend(newEvaluation, res)
       cb(null, newEvaluation);
     });
 

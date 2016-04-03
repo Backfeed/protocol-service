@@ -63,7 +63,7 @@ function cacheTotalUsersRep(event, cb) {
   ]);
 }
 
-// This function gets called whenever there1's a change on users table
+// This function gets called whenever there's a change on users table
 function syncCachedSystemRep(event, cb) {
   var repToAdd = 0;
   var temp;

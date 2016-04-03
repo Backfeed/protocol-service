@@ -3,6 +3,7 @@
 module.exports = {
   createContribution          : createContribution,
   getContribution             : getContribution,
+  getContributions            : getContributions,
   getContributionWithStats    : getContributionWithStats,
   getContributions            : getContributions,
   getContributionEvaluations  : getContributionEvaluations,
@@ -25,11 +26,13 @@ var getCachedRep   = require('./getCachedRep');
 
 function createContribution(event, cb) {
 
+  var user;
+
   var newContribution = {
     "id": util.uuid(),
     "userId": event.userId,
     "biddingId": event.biddingId,
-    "maxScore": 0,
+    "scoreAtPrevReward": 0,
     "createdAt": Date.now()
   };
 
@@ -46,19 +49,22 @@ function createContribution(event, cb) {
       if (bidding.status === 'Completed') return cb(new Error('400. bad request. bidding is complete, no more contributions please!'));
       usersLib.getUser({ id: event.userId }, waterfallCB);
     },
-    function(user, waterfallCB) {
+    function(response, waterfallCB) {
+      user = response;
       if (protocol.notEnoughTokens(user)) return cb(new Error('400. bad request. not enough tokens for the contribution fee'));
       user = protocol.payContributionFee(user);
       util.log.info("User after contribution fee", user);
       usersLib.updateUser(user, waterfallCB);
     },
-    function() {
-      return db.put(params, cb, newContribution);
+    function(response, waterfallCB) {
+      db.put(params, waterfallCB);
     }
   ], function (err) {
-    if (err) {
+    if (err)
       return cb(err);
-    }
+
+    newContribution.contributorNewTokenBalance = user.tokens;
+    cb(null, newContribution)
   });
 
 }
@@ -74,61 +80,68 @@ function getContribution(event, cb) {
 }
 
 function getContributions(event, cb) {
-  // return getContribution(event,cb)
-  // return 'xxx'
-  var params = {
-    TableName : config.tables.contributions,
-  };
-  return db.scan(params, cb)
-  // var addAttributesToItems = function(error, data) {
-  //   util.shout('-------------', data)
-  //   elements = data.Items
-  //   _.each(elements, function(element){
-  //     util.shout(element);
-  //     element.scorePercentage = 'x'; 
-  //     element.something = 'x'; 
-  //   });
-  //   return cb(err, data)
+  var toReturn = [];
+  async.waterfall([
+    function(waterfallCB) {
+      var params = {
+        TableName: config.tables.contributions,
+        ConsistentRead: true,
+        ReturnConsumedCapacity: "TOTAL"
+      };
+      db.scan(params, waterfallCB);
+    },
+    function(contributions, waterfallCB) {
+      async.each(contributions, function(c, eachCB) {
+        getContributionWithStats({id: c.id}, function(err, res) {
+          toReturn.push(res);
+          eachCB();
+        });
+      }, waterfallCB);
+    }
+  ], function(err, res) {
+    cb(null, toReturn);
+  });
 
-  // }
-  // return db.scan(params, addAttributesToItems)
 }
-
-
 
 function getContributionWithStats(event, cb) {
   var id = event.id;
-  var contribution;
   var evaluations;
   var evaluators;
-  var totalSystemRep;
 
   async.parallel({
     contribution: function(parallelCB) {
       getContribution(event, parallelCB);
     },
-    evaluations: function(parallelCB) {
-      evaluationsLib.getEvaluationsByContribution(id, parallelCB);
+    evaluationsAndEvaluators: function(parallelCB) {
+      async.waterfall([
+        function(waterfallCB) {
+          evaluationsLib.getEvaluationsByContribution(id, waterfallCB);
+        },
+        function(response, waterfallCB) {
+          evaluations = response;
+          // If there's no evaluations, skip fetching the evaluators
+          if (evaluations.length) {
+            usersLib.getEvaluators(evaluations, waterfallCB);
+          } else { waterfallCB(); }
+        },
+        function(response, waterfallCB) {
+          // If there's no evaluations, response will be empty, so we set empty array to pass to protocol function
+          evaluators = response || [];
+          parallelCB();
+        }
+      ]);
     },
     cachedRep: function(parallelCB) {
-      getCachedRep(parallelCB)
+      getCachedRep(parallelCB);
     }
   }, function(err, response) {
     if (err) return cb(err);
-    contribution = response.contribution;
-    evaluations = response.evaluations;
-    totalSystemRep = response.cachedRep.theValue;
-    async.waterfall([
-      function(waterfallCB) {
-        usersLib.getEvaluators(evaluations, waterfallCB);
-      }
-    ], function(err, response) {
-      if (err) return cb(err);
-      evaluators = response;
-      var protoStats = protocol.getStats(evaluations, evaluators, totalSystemRep)
-      var toResponse = _.extend(contribution, protoStats);
-      cb(null, toResponse);
-    });
+    var contribution = response.contribution;
+    var totalSystemRep = response.cachedRep.theValue;
+    var protoStats = protocol.getStats(evaluations, evaluators, totalSystemRep)
+    var toResponse = _.extend(contribution, protoStats);
+    cb(null, toResponse);
   });
 }
 
@@ -199,7 +212,7 @@ function addToMaxScore(id, newRep, cb) {
     TableName : config.tables.contributions,
     Key: { id: id },
     UpdateExpression: 'set #score = #score + :v',
-    ExpressionAttributeNames: { '#score' : 'maxScore' },
+    ExpressionAttributeNames: { '#score' : 'scoreAtPrevReward' },
     ExpressionAttributeValues: { ':v' : newRep },
     ReturnValues: 'ALL_NEW'
   }
