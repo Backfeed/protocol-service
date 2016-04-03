@@ -50,13 +50,13 @@ describe("Unit Test Protocol", function() {
     expect(protocol.evaluate('current', 1, evaluators,evaluations,.1)[0].reputation).to.be.equal(0.10526315789473684);
   });
 
-  it("should notEnoughTokens", function () {
+  xit("should notEnoughTokens", function () {
     expect(protocol.notEnoughTokens({ tokens: 2 })).to.be.equal(false);
     expect(protocol.notEnoughTokens({ tokens: 1 })).to.be.equal(false);
     expect(protocol.notEnoughTokens({ tokens: 0 })).to.be.equal(true);
   });
 
-  it("should payContributionFee", function () {
+  xit("should payContributionFee", function () {
     expect(protocol.payContributionFee({ tokens: 2 }).tokens).to.be.equal(1);
   });
 

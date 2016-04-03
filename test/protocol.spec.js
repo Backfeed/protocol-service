@@ -61,7 +61,7 @@ describe("Test protocol according to excel", function() {
   //  });
   //});
 
-  it("should cost tokens for submitting a contribution", function () {
+  xit("should cost tokens for submitting a contribution", function () {
     arr = [
       util.contribution.create({ userId: p1.id , biddingId: biddingId }),
       util.contribution.create({ userId: p2.id , biddingId: biddingId })
@@ -84,7 +84,7 @@ describe("Test protocol according to excel", function() {
   });
 
   //   1- P1  evaluates  C1  by  1  at time  10000
-  it("should distribute rep according to step 1", function() {
+  xit("should distribute rep according to step 1", function() {
     return util.evaluation.create({
         biddingId: biddingId,
         userId: p1.id,
@@ -112,7 +112,7 @@ describe("Test protocol according to excel", function() {
   });
 
   //   2- P2  evaluates  C1  by  0  at time  20000
-  it("should distribute rep according to step 2", function() {
+  xit("should distribute rep according to step 2", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p2.id,
@@ -140,7 +140,7 @@ describe("Test protocol according to excel", function() {
   });
 
   //   3- P3  evaluates  C1  by  1  at time  30000
-  it("should distribute rep according to step 3", function() {
+  xit("should distribute rep according to step 3", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p3.id,
@@ -168,7 +168,7 @@ describe("Test protocol according to excel", function() {
   });
 
   //   4- P4  evaluates  C2  by  1  at time  40000
-  it("should distribute rep according to step 4", function() {
+  xit("should distribute rep according to step 4", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p4.id,
@@ -197,7 +197,7 @@ describe("Test protocol according to excel", function() {
   });
 
   //   5- P5  evaluates  C2  by  0  at time  50000
-  it("should distribute rep according to step 5", function() {
+  xit("should distribute rep according to step 5", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p5.id,
@@ -227,7 +227,7 @@ describe("Test protocol according to excel", function() {
   });
 
   //   6- P1  evaluates  C2  by  1  at time  60000
-  it("should distribute rep according to step 6", function() {
+  xit("should distribute rep according to step 6", function() {
     return util.evaluation.create({
       biddingId: biddingId,
       userId: p1.id,
@@ -257,6 +257,5 @@ describe("Test protocol according to excel", function() {
     })
   });
 
- 
 
 });
